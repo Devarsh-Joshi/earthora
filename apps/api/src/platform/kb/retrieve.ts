@@ -1,6 +1,5 @@
 import { sql } from '../../db/client.js';
 import { getEmbedding } from '../providers/index.js';
-import { inVoiceScope, voiceTenantId } from '../providers/voiceScope.js';
 
 export interface RetrievalHit { id: string; documentId: string; documentTitle: string; content: string; contextHeader: string; score: number; vectorScore: number; keywordScore: number; authority: number; uri: string | null }
 export interface RetrievalOptions { collections?: string[]; tags?: string[]; workflowId?: string; productIds?: string[]; topK?: number; vectorWeight?: number; keywordWeight?: number; minScore?: number; includeInternal?: boolean }
@@ -11,9 +10,8 @@ export async function retrieve(query: string, opts: RetrievalOptions = {}): Prom
   if (!q) return [];
   const topK = opts.topK ?? 6;
   const candidate = Math.max(topK * 4, 20);
-  const voice = inVoiceScope();
-  const [vec] = voice ? [] : await getEmbedding().embed([q]);
-  const vecLit = vec ? `[${vec.join(',')}]` : '';
+  const [vec] = await getEmbedding().embed([q]);
+  const vecLit = `[${vec.join(',')}]`;
 
   const tagFilter = opts.tags?.length ? sql`AND c.tags && ${opts.tags}` : sql``;
   const wfFilter = opts.workflowId ? sql`AND (cardinality(c.workflow_ids) = 0 OR ${opts.workflowId}::uuid = ANY(c.workflow_ids))` : sql``;
@@ -22,25 +20,20 @@ export async function retrieve(query: string, opts: RetrievalOptions = {}): Prom
     ? sql`AND c.collection_id IN (SELECT id FROM kb_collections WHERE slug = ANY(${opts.collections}))`
     : sql``;
   const effFilter = sql`AND d.status = 'indexed' AND (d.effective_until IS NULL OR d.effective_until > now()) AND (d.effective_from IS NULL OR d.effective_from <= now())`;
-  const tenantFilter = voiceTenantId() ? sql`AND c.tenant_id = ${voiceTenantId()!}` : sql``;
 
-  const vectorRows = voice ? [] : await sql<any[]>`
+  const vectorRows = await sql<any[]>`
     SELECT c.id, c.document_id, d.title AS document_title, d.uri, d.authority, c.content, c.context_header,
            1 - (c.embedding <=> ${vecLit}::vector) AS vscore
     FROM kb_chunks c JOIN kb_documents d ON d.id = c.document_id
     WHERE c.embedding IS NOT NULL ${tagFilter} ${wfFilter} ${visFilter} ${collFilter} ${effFilter}
     ORDER BY c.embedding <=> ${vecLit}::vector LIMIT ${candidate}`;
 
-  // Voice queries have already been translated to English keywords by the router.
-  // OR matching avoids requiring every conversational filler word in one passage.
-  const terms = [...new Set((q.toLowerCase().match(/[\p{L}\p{N}]+/gu) || [])
-    .filter((word) => word.length > 1 && !new Set(['the', 'what', 'is', 'are', 'and', 'for', 'please', 'about', 'how', 'can', 'you', 'me', 'do', 'to', 'of', 'in']).has(word)))].slice(0, 16);
-  const keywordQuery = voice ? sql`to_tsquery('simple', ${terms.join(' | ')})` : sql`plainto_tsquery('simple', ${q})`;
+  const keywordQuery = sql`plainto_tsquery('simple', ${q})`;
   const keywordRows = await sql<any[]>`
     SELECT c.id, c.document_id, d.title AS document_title, d.uri, d.authority, c.content, c.context_header,
            ts_rank(c.tsv, ${keywordQuery}) + similarity(c.content, ${q}) AS kscore
     FROM kb_chunks c JOIN kb_documents d ON d.id = c.document_id
-    WHERE (c.tsv @@ ${keywordQuery} OR c.content % ${q}) ${tagFilter} ${wfFilter} ${visFilter} ${collFilter} ${effFilter} ${tenantFilter}
+    WHERE (c.tsv @@ ${keywordQuery} OR c.content % ${q}) ${tagFilter} ${wfFilter} ${visFilter} ${collFilter} ${effFilter}
     ORDER BY kscore DESC LIMIT ${candidate}`;
 
   const kw = opts.keywordWeight ?? 0.4; const vw = opts.vectorWeight ?? 0.6;

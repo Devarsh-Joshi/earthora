@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 
 /**
- * Loads the Earthora assistant (chat + voice) onto customer-facing pages.
+ * Loads the Earthora chat assistant onto customer-facing pages.
  *
  * The widget itself is a self-contained script served by the API at
  * /widget.js, the same artifact given to third parties to embed. Loading it
@@ -20,7 +20,7 @@ const STAFF_PREFIXES = ['/sun-earthora', '/kacc', '/developer'];
 const CHANNEL_KEY = import.meta.env.VITE_ASSISTANT_CHANNEL_KEY as string | undefined;
 const API_ORIGIN = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
 const SCRIPT_ID = 'earthora-assistant-widget';
-const WIDGET_VERSION = 'assistant20260930d';
+const WIDGET_VERSION = 'assistant20261028a';
 
 export function widgetScriptUrl(apiOrigin: string): string {
   return `${apiOrigin}/widget.js?v=${WIDGET_VERSION}`;
@@ -75,23 +75,6 @@ export function AssistantWidget() {
     if (launcher) launcher.style.display = onStaffPage ? 'none' : '';
     if (onStaffPage && panel) panel.classList.remove('open');
   }, [onStaffPage, location]);
-
-  // Keep the compact call controls above the product's mobile purchase bar.
-  // Measuring the actual bar also handles text scaling and safe-area padding.
-  useEffect(() => {
-    let observed:Element|null = null;
-    const resize = new ResizeObserver(()=>measure());
-    const measure=()=>{
-      const bar=document.querySelector<HTMLElement>('[data-voice-bottom-bar]');
-      if (bar !== observed) { resize.disconnect(); if (bar) resize.observe(bar); observed=bar; }
-      const height=bar && bar.getClientRects().length ? Math.ceil(bar.getBoundingClientRect().height) : 0;
-      document.body.style.setProperty('--ea-voice-bottom-inset',`${height}px`);
-    };
-    const observer=new MutationObserver(measure);
-    observer.observe(document.body,{childList:true,subtree:true});
-    window.addEventListener('resize',measure); measure();
-    return ()=>{observer.disconnect();resize.disconnect();window.removeEventListener('resize',measure);};
-  },[location]);
 
   return null;
 }

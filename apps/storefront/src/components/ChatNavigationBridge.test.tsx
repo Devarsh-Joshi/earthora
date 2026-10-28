@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const router = vi.hoisted(() => ({ location: '/health-benefits', navigate: vi.fn() }));
 vi.mock('wouter', () => ({ useLocation: () => [router.location, router.navigate] }));
 import { ChatNavigationBridge, productNavigationForChat } from './ChatNavigationBridge';
-import { VoiceNavigationBridge } from './VoiceNavigationBridge';
+import { StorefrontNavigationBridge } from './StorefrontNavigationBridge';
 
 let root: Root;
 beforeEach(() => {
@@ -22,7 +22,7 @@ beforeEach(() => {
   const mount = document.createElement('div');
   document.body.appendChild(mount);
   root = createRoot(mount);
-  act(() => root.render(<><VoiceNavigationBridge /><ChatNavigationBridge /></>));
+  act(() => root.render(<><StorefrontNavigationBridge /><ChatNavigationBridge /></>));
 });
 afterEach(() => {
   act(() => root.unmount());
@@ -40,7 +40,7 @@ describe('typed-chat product navigation', () => {
       window.history.pushState(null, '', path);
       setTimeout(() => {
         const page = document.createElement('div');
-        page.dataset.earthoraVoicePage = '/';
+        page.dataset.earthoraPage = '/';
         page.innerHTML = '<section id="products">Moringa tablets</section>';
         document.body.appendChild(page);
       }, 0);

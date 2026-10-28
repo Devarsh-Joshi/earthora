@@ -20,7 +20,7 @@ function mountWidget(reply: { ok: boolean; body?: string }) {
   (win as any).TextDecoder = TextDecoder;
   vi.spyOn(win.HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => null);
   (win as any).fetch = vi.fn((url: string) => {
-    if (url.endsWith('/config')) return Promise.resolve({ json: async () => ({ name: 'Eva', starters: [], voiceEnabled: false }) });
+    if (url.endsWith('/config')) return Promise.resolve({ json: async () => ({ name: 'Eva', starters: [] }) });
     let sent = false;
     return Promise.resolve({
       ok: reply.ok,

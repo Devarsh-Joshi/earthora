@@ -31,17 +31,6 @@ export interface Review {
   date: string;
 }
 
-export interface FestiveDeal {
-  id: string;
-  festival_name: string;
-  festival_status: string;
-  festival_start_date: string;
-  festival_end_date: string;
-  discount_type: 'percentage' | 'fixed';
-  discount_value: number;
-  festival_deal_products: { product_id: string }[];
-}
-
 export interface DbReview {
   review_product_id: string;
   review_user_id: string;
@@ -110,16 +99,3 @@ export interface DbOrderItem {
   created_at?: string;
 }
 
-export interface DbCoupon {
-  id: number;
-  coupon_code: string;
-  coupon_discount_type: 'percentage' | 'fixed';
-  coupon_discount_amount: number;
-  coupon_discount_value: number;
-  coupon_min_order: number;
-  coupon_max_uses?: number;
-  coupon_used_count: number;
-  coupon_expiry_date?: string;
-  coupon_status: 'active' | 'inactive';
-  coupon_description: string;
-}

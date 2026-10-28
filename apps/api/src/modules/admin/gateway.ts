@@ -24,9 +24,6 @@ const RULES: Record<string, TableRule> = {
   Payments: { read: [...ADMIN, ...KACC, 'developer'], write: ADMIN, pk: 'id' },
   Order_history: { read: [...ADMIN, ...KACC], write: ADMIN, pk: 'id' },
   User_details: { read: ADMIN, write: ADMIN, pk: 'id', hidden: ['user_password'] },
-  coupon_details: { read: ADMIN, write: ADMIN, pk: 'id' },
-  festival_details: { read: ADMIN, write: ADMIN, pk: 'id' },
-  festival_deal_products: { read: ADMIN, write: ADMIN, pk: 'id' },
   product_knowledge: { read: ADMIN_DEV, write: [], pk: 'id' },
   review_details: { read: ADMIN, write: ADMIN, pk: 'id' },
   Contact_details: { read: ADMIN, write: [], pk: 'id' },
@@ -42,7 +39,6 @@ const RULES: Record<string, TableRule> = {
 interface Relation { table: string; fk: string; localKey: string; many: boolean }
 const RELATIONS: Record<string, Record<string, Relation>> = {
   products: { inventory: { table: 'inventory', fk: 'product_id', localKey: 'id', many: false } },
-  festival_details: { festival_deal_products: { table: 'festival_deal_products', fk: 'deal_id', localKey: 'id', many: true } },
   orders: { order_items: { table: 'order_items', fk: 'order_id', localKey: 'id', many: true } },
   order_items: { products: { table: 'products', fk: 'id', localKey: 'product_id', many: false } },
 };
@@ -71,7 +67,7 @@ async function columnsOf(table: string): Promise<Set<string>> {
 }
 export function invalidateColumnCache(): void { columnCache = null; }
 
-// Writes to these tables change what the voice assistant can say about the
+// Writes to these tables change what the chat assistant can say about the
 // catalogue; the knowledge base's product documents follow them.
 const KB_SYNC_TABLES = new Set(['products', 'inventory']);
 function afterWrite(table: string, op: string): void {

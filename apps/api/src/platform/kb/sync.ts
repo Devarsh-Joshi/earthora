@@ -1,6 +1,6 @@
 /** Keep the knowledge base in step with the live website: products, page copy, and (optionally) a crawl.
 
-The catalogue and approved product facts are read live by every voice turn, but the
+The catalogue and approved product facts are read live by every chat turn, but the
 indexed documents used by keyword/semantic search were only rebuilt by a manual
 "index website" job. Now:
 - any product, stock or knowledge change enqueues a product-document sync;

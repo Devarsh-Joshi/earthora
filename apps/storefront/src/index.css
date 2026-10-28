@@ -49,6 +49,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Extra breakpoint used by the Hero (matches the pre-monorepo tailwind.config). */
+  --breakpoint-xs: 30rem;
 }
 
 :root {
@@ -313,4 +316,28 @@
 .delay-900 { animation-delay: 0.9s; }
 .delay-1000 { animation-delay: 1.0s; }
 .delay-1100 { animation-delay: 1.1s; }
+
+/* Keep the entire three-product photograph in frame at every viewport width. */
+.earthora-hero {
+  background-color: #102313;
+  background-position: center bottom;
+  background-size: 100% auto;
+}
+
+.earthora-hero-scrim {
+  background: linear-gradient(0deg, #102313 0%, rgba(16, 35, 19, 0.98) 4%, transparent 22%), linear-gradient(180deg, #102313 0%, rgba(16, 35, 19, 0.25) 24%, transparent 42%), linear-gradient(90deg, rgba(6, 18, 10, 0.78) 0%, rgba(6, 18, 10, 0.55) 28%, rgba(6, 18, 10, 0.14) 52%, transparent 70%);
+}
+
+@media (min-width: 1200px) {
+  .earthora-hero {
+    background-position: center center;
+    background-size: 100% auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .earthora-hero-scrim {
+    background: linear-gradient(180deg, #102313 0%, #102313 52%, rgba(16, 35, 19, 0.92) 68%, transparent 88%);
+  }
+}
 

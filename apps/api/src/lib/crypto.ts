@@ -40,7 +40,7 @@ export function verifySigned(token: string, secret = config.TOKEN_SIGNING_SECRET
 
 const keyBuffer = (): Buffer => Buffer.from(config.PII_ENCRYPTION_KEY, 'hex');
 
-/** AES-256-GCM envelope: base64url(iv).base64url(tag).base64url(ciphertext) — same envelope as the old voice service. */
+/** AES-256-GCM envelope: base64url(iv).base64url(tag).base64url(ciphertext) — used for checkout-link tokens. */
 export function encryptText(plain: string): string {
   const iv = randomBytes(12);
   const cipher = createCipheriv('aes-256-gcm', keyBuffer(), iv);

@@ -516,7 +516,7 @@ BEGIN
      (OLD.total_stock > NEW.low_stock_threshold OR OLD.total_stock IS NULL OR NEW.alert_sent_at IS NULL)
   THEN
     SELECT name INTO v_product_name FROM products WHERE id = NEW.product_id;
-    -- This is the dispatch/restocking WhatsApp line. Keep the configured
+    -- This is the dispatch/restocking alert line. Keep the configured
     -- number in one place until a secure settings service replaces it.
     v_admin_phone := '7572866635';
     v_recipients := ARRAY[v_admin_phone];

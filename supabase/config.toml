@@ -15,8 +15,5 @@ verify_jwt = false # verifies the admin password server-side on every mutation
 [functions.send-invoice]
 verify_jwt = false
 
-[functions.send-order-tracking]
-verify_jwt = false # verifies the admin password server-side on every request
-
 [functions.send-sms-alert]
 verify_jwt = false # invoked by the sms_alert_logs database webhook

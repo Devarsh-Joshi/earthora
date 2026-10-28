@@ -170,7 +170,7 @@ export default function ProductDetail() {
     return (
       <div className="min-h-screen flex flex-col bg-[#FAF9F5] text-black">
         <Navbar />
-        <main data-voice-page-error className="flex-1 max-w-[1400px] mx-auto w-full px-6 py-36 text-center">
+        <main data-page-error className="flex-1 max-w-[1400px] mx-auto w-full px-6 py-36 text-center">
           <AlertCircle className="w-12 h-12 text-black/40 mx-auto mb-4" />
           <h1 className="font-dm text-3xl font-normal text-black mb-3">Product Not Found</h1>
           <p className="font-inter text-sm text-black/60 mb-8 max-w-md mx-auto">
@@ -628,7 +628,7 @@ export default function ProductDetail() {
       </main>
 
       {/* Sticky Mobile Buy Bar */}
-      <div data-voice-bottom-bar className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-black/10 px-4 py-3 shadow-2xl flex items-center justify-between gap-3">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-black/10 px-4 py-3 shadow-2xl flex items-center justify-between gap-3">
         <div>
           <span className="font-dm text-lg font-semibold text-[#0E1F13]">₹{product.price.toFixed(0)}</span>
           <span className="block text-[10px] font-inter text-black/50">Free Express Delivery</span>

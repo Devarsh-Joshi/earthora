@@ -1,13 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Menu, X, Heart, ChevronDown } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { ShoppingBag, Menu, X, Heart } from "lucide-react";
 import { useCart } from "@/contexts/cart-context";
 import { useEscapeKey } from "@/hooks/useEscapeKey";
-import { publicProductsQuery } from "@/lib/catalogQuery";
-import type { Product } from "@/types";
 import earthoraTextSvg from "@assets/generated_images/Earthora Text.svg";
 
 const WISHLIST_KEY = "earthora-wishlist";
@@ -23,32 +20,20 @@ function readWishlistCount(): number {
   }
 }
 
-function cleanProductName(name: string): string {
-  if (!name) return "";
-  return name.replace(/\s*\(.*?\)/g, "").trim();
-}
-
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [favoritesCount, setFavoritesCount] = useState(0);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const { cartCount } = useCart();
   const { scrollY } = useScroll();
-  const [location, setLocation] = useLocation();
+  const [location] = useLocation();
 
   const isHomePage = location === "/";
 
-  const { data: products = [] } = useQuery<Product[]>({
-    ...publicProductsQuery,
-  });
-
   useEscapeKey(() => {
     setIsMobileOpen(false);
-    setProductsDropdownOpen(false);
-  }, isMobileOpen || productsDropdownOpen);
+  }, isMobileOpen);
 
   useEffect(() => {
     setMounted(true);
@@ -79,10 +64,19 @@ export function Navbar() {
     setIsScrolled(latest > 40);
   });
 
-  const handleProductClick = (productId: string) => {
+  useEffect(() => {
+    if (location === "/" && window.location.hash === "#products") {
+      requestAnimationFrame(() => document.getElementById("products")?.scrollIntoView());
+    }
+  }, [location]);
+
+  const handleProductsClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     setIsMobileOpen(false);
-    setProductsDropdownOpen(false);
-    setLocation(`/product/${productId}`);
+    if (location === "/") {
+      event.preventDefault();
+      window.history.replaceState(null, "", "/#products");
+      requestAnimationFrame(() => document.getElementById("products")?.scrollIntoView({ behavior: "smooth" }));
+    }
   };
 
   const headerBg = isScrolled
@@ -91,8 +85,14 @@ export function Navbar() {
     ? "bg-transparent border-transparent"
     : "bg-[#FAF9F5]/90 backdrop-blur-md border-black/8";
 
-  const textColor = isHomePage && !isScrolled ? "text-white" : "text-black";
-  const mutedTextColor = isHomePage && !isScrolled ? "text-white/80 hover:text-white" : "text-black/70 hover:text-black";
+  // On the home hero (dark green nature photo) before the user scrolls,
+  // the nav needs to render white. Everywhere else — cream-backed pages
+  // and once scrolled past the hero — it goes back to dark on cream.
+  const onDarkHero = isHomePage && !isScrolled;
+  const textColor = onDarkHero ? "text-white" : "text-black";
+  const mutedTextColor = onDarkHero
+    ? "text-white/80 hover:text-white"
+    : "text-black/70 hover:text-black";
 
   return (
     <>
@@ -120,81 +120,11 @@ export function Navbar() {
               </span>
             </Link>
 
-            {/* Dynamic Products: direct links if <= 3, elegant dropdown if > 3 */}
-            {products.length <= 3 ? (
-              products.map((p) => {
-                const isActive = location === `/product/${p.id}` || location === `/product/${(p as any).slug}`;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => handleProductClick(p.id)}
-                    className={`transition-colors cursor-pointer text-sm font-dm font-medium text-left ${
-                      isActive ? "opacity-100 font-semibold underline underline-offset-4" : mutedTextColor
-                    }`}
-                  >
-                    {cleanProductName(p.name)}
-                  </button>
-                );
-              })
-            ) : (
-              <div
-                ref={dropdownRef}
-                className="relative"
-                onMouseEnter={() => setProductsDropdownOpen(true)}
-                onMouseLeave={() => setProductsDropdownOpen(false)}
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (location === "/") {
-                      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
-                    } else {
-                      setLocation("/#products");
-                    }
-                  }}
-                  className={`flex items-center gap-1.5 transition-colors cursor-pointer text-sm font-dm font-medium ${mutedTextColor}`}
-                >
-                  <span>Products</span>
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${productsDropdownOpen ? "rotate-180" : ""}`} />
-                </button>
-
-                <AnimatePresence>
-                  {productsDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
-                      transition={{ duration: 0.18, ease: "easeOut" }}
-                      className="absolute top-full left-0 mt-2 w-72 bg-white/95 backdrop-blur-md rounded-2xl p-2 shadow-2xl border border-black/10 z-50 text-black flex flex-col gap-1"
-                    >
-                      {products.map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => handleProductClick(p.id)}
-                          className="flex items-center gap-3 p-2 rounded-xl hover:bg-black/5 transition-colors text-left w-full group/item"
-                        >
-                          <img
-                            src={p.imageMain}
-                            alt={p.name}
-                            className="w-10 h-10 rounded-lg object-cover bg-[#F3F1EA] shrink-0 border border-black/5"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-dm font-medium text-black truncate group-hover/item:text-emerald-800 transition-colors">
-                              {cleanProductName(p.name)}
-                            </p>
-                            <p className="text-[11px] font-inter text-black/50 font-normal">
-                              ₹{p.price.toFixed(0)}
-                            </p>
-                          </div>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+            <Link href="/#products" onClick={handleProductsClick}>
+              <span className={`transition-colors cursor-pointer ${mutedTextColor}`}>
+                Our Products
+              </span>
+            </Link>
 
             <Link href="/health-benefits">
               <span className={`transition-colors cursor-pointer ${location === "/health-benefits" ? "opacity-100 font-semibold underline underline-offset-4" : mutedTextColor}`}>
@@ -202,11 +132,6 @@ export function Navbar() {
               </span>
             </Link>
 
-            <Link href="/contact">
-              <span className={`transition-colors cursor-pointer ${location === "/contact" ? "opacity-100 font-semibold underline underline-offset-4" : mutedTextColor}`}>
-                Contact
-              </span>
-            </Link>
           </nav>
 
           <div className="flex items-center gap-3 sm:gap-4 font-inter">
@@ -272,38 +197,11 @@ export function Navbar() {
                     </span>
                   </Link>
 
-                  {/* Mobile Products List */}
-                  {products.length > 0 && (
-                    <div className="py-2">
-                      <span className="px-4 text-[10px] font-inter font-semibold tracking-[0.2em] uppercase text-black/40 block mb-1.5">
-                        Products
-                      </span>
-                      <div className="flex flex-col gap-1">
-                        {products.map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => handleProductClick(p.id)}
-                            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-left hover:bg-black/5 transition-colors w-full"
-                          >
-                            <img
-                              src={p.imageMain}
-                              alt={p.name}
-                              className="w-8 h-8 rounded-lg object-cover bg-[#F3F1EA] shrink-0 border border-black/5"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <span className="block font-dm text-sm font-medium text-black truncate">
-                                {cleanProductName(p.name)}
-                              </span>
-                              <span className="block font-inter text-[11px] text-black/50">
-                                ₹{p.price.toFixed(0)}
-                              </span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <Link href="/#products" onClick={handleProductsClick}>
+                    <span className="block px-4 py-3 font-dm text-base font-normal rounded-xl transition-colors cursor-pointer text-black/70 hover:bg-black/5">
+                      Our Products
+                    </span>
+                  </Link>
 
                   <Link href="/health-benefits" onClick={() => setIsMobileOpen(false)}>
                     <span className={`block px-4 py-3 font-dm text-base font-normal rounded-xl transition-colors cursor-pointer ${location === "/health-benefits" ? "bg-black/10 text-black font-medium" : "text-black/70 hover:bg-black/5"}`}>
@@ -311,11 +209,6 @@ export function Navbar() {
                     </span>
                   </Link>
 
-                  <Link href="/contact" onClick={() => setIsMobileOpen(false)}>
-                    <span className={`block px-4 py-3 font-dm text-base font-normal rounded-xl transition-colors cursor-pointer ${location === "/contact" ? "bg-black/10 text-black font-medium" : "text-black/70 hover:bg-black/5"}`}>
-                      Contact
-                    </span>
-                  </Link>
                 </div>
               </motion.nav>
             </>

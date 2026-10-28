@@ -16,8 +16,7 @@
     "build": "npm run build -w @earthora/api -w @earthora/storefront -w @earthora/console --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:schema": "node --test tests/whatsapp-integration.test.mjs tests/knowledge-admin.test.mjs tests/whatsapp-chatbot-inbox.test.mjs",
-    "test:whatsapp-integration": "npm run test:schema"
+    "test:schema": "node --test tests/knowledge-admin.test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

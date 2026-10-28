@@ -1,9 +1,8 @@
 import { useState } from 'react';
-import { MessageSquare, Mic, Phone, MessageCircle, Copy, ExternalLink } from 'lucide-react';
+import { MessageSquare, Copy, ExternalLink } from 'lucide-react';
 import { api } from '../api';
 import { Section, useAsync, Spinner, Toggle, Modal } from '../ui';
 
-const ICON: Record<string, any> = { chat: MessageSquare, voice: Mic, whatsapp: MessageCircle, calls: Phone };
 const STORE = 'http://localhost:5173';
 
 export function Channels() {
@@ -11,10 +10,10 @@ export function Channels() {
   const [openId, setOpenId] = useState<string | null>(null);
   return (
     <div className="space-y-6">
-      <div><h1 className="font-serif text-2xl">Channels</h1><p className="text-sm text-[#7d8f83] mt-1">One assistant, four surfaces. Each has its own persona, workflows and settings; publish applies to new conversations.</p></div>
+      <div><h1 className="font-serif text-2xl">Channels</h1><p className="text-sm text-[#7d8f83] mt-1">The website chat assistant. Its persona, workflows and settings publish to new conversations.</p></div>
       {list.loading ? <div className="text-[#7d8f83]"><Spinner /></div> : (
         <div className="grid md:grid-cols-2 gap-4">
-          {list.data.channels.map((c: any) => { const Icon = ICON[c.type] || MessageSquare; return (
+          {list.data.channels.map((c: any) => { const Icon = MessageSquare; return (
             <button key={c.id} className="card p-5 text-left hover:border-[#2f6d48] transition" onClick={() => setOpenId(c.id)}>
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-[#1c2b23] flex items-center justify-center"><Icon className="w-5 h-5 text-[#9fd0b4]" /></div>

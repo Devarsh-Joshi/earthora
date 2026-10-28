@@ -57,34 +57,22 @@ and verified in the intended environment.
 
 ## Project map
 
-### Current voice path (20 September 2026)
+The voice agent (web/phone) and the WhatsApp agent were removed on 28 October
+2026. The website chat assistant is the only AI channel; do not restore the old
+voice-service, whatsapp-chatbot or livekit-voice code without an explicit request.
 
-For Earthora web/phone voice, `livekit-voice/` is the active MSH/Sun Pathology
-adaptation with GPU-only inference. Its runtime guide and `SUNPATH-DEPLOYMENT.md`
-supersede the historical Render voice map below. The active voice API reads the
-current VPS PostgreSQL catalogue and approved product knowledge. Legacy Supabase
-and Render material may be used as a knowledge reference when requested; do not
-restore that media architecture or import its prompts as new approved facts.
-See `livekit-voice/verification/sunpath/20260920-naturalness-and-knowledge.md` for
-the latest deployment and verification evidence. Other channels retain their
-existing contracts; this voice update does not authorize changing them.
-
-- `src/`: React 19, TypeScript, Vite, Tailwind storefront and the developer,
-  SUN/Earthora, and KACC admin surfaces.
-- `supabase/`: website/agent schemas, incremental migrations, and Edge Functions
-  for OTP, admin verification, product knowledge, invoices, order tracking,
-  uploads, and stock/SMS alerts.
-- `voice-service/`: Fastify/TypeScript voice and text ordering backend deployed to
-  Render. It owns conversation state, live catalogue/knowledge access, pricing,
-  secure checkout links, Razorpay integration, invoice generation, speech
-  adapters, and Smartflo streaming.
-- `whatsapp-chatbot/`: WhatsApp transport and durable inbox worker. It reuses the
-  voice-service conversation, cart, checkout, pricing, and payment code rather
-  than maintaining parallel business logic.
+- `apps/storefront/`: React 19, TypeScript, Vite, Tailwind storefront and the
+  developer, SUN/Earthora, and KACC admin surfaces.
+- `apps/api/`: Fastify/TypeScript business API and worker. It owns the catalogue,
+  pricing, Razorpay Magic Checkout, invoices, notifications and the website chat
+  assistant platform (`src/platform`), including chat checkout-review links.
+- `apps/console/`: AI administration console for the chat assistant.
+- `supabase/`: website schemas, incremental migrations, and Edge Functions for
+  OTP, admin verification, product knowledge, invoices, uploads, and stock/SMS
+  alerts.
 - `netlify/functions/`: storefront server functions for Razorpay order creation
-  and verification, invoices, and Render keep-awake scheduling.
-- `tests/` and `voice-service/tests/`: cross-stack integration coverage and the
-  backend unit, integration, and end-to-end suites.
+  and verification, and invoices.
+- `tests/`: cross-stack schema tests for the Supabase knowledge-admin function.
 - `C:\Earthora\Docs`: lease, PKM-2 crop-management guide, and Gujarati farm-worker
   operating plan. Consult these when a task touches facilities or farm operations.
 
@@ -92,36 +80,25 @@ existing contracts; this voice update does not authorize changing them.
 
 - Supabase is the shared production data source. Server-only keys must never use a
   `VITE_` prefix or enter the browser bundle.
-- Voice and WhatsApp ordering must use current Supabase products, stock, pricing,
-  coupons, and approved product knowledge; do not hard-code a second catalogue.
+- The chat assistant must use current products, stock, pricing and approved
+  product knowledge; do not hard-code a second catalogue.
 - The editable review form is the customer confirmation boundary. Only verified
-  payment/finalization paths may write real orders and payments, and webhook or
-  inbox retries must remain idempotent.
-- Keep pricing logic in `voice-service/src/domain/pricing.ts` aligned with the
-  storefront implementation and `voice-service/tests/fixtures/pricing-cases.json`.
-- Preserve durable WhatsApp ordering, deduplication, retry behavior, and per-phone
-  message order when changing the worker or webhook path.
-- Do not point the same WhatsApp number at competing callback services.
-- The root `render.yaml` defines both the Node voice service and a separate paid
-  Python messaging-platform service. Do not apply the whole Blueprint when the
-  task concerns only one service.
+  payment/finalization paths may write real orders and payments, and webhook
+  retries must remain idempotent.
+- Keep pricing logic in `apps/api/src/modules/commerce/pricing.ts` aligned with the
+  storefront implementation and `apps/api/src/modules/commerce/pricing-cases.json`.
 
 ## Verification expectations
 
 Run the checks relevant to the changed surface and fix failures caused by the
 work. Do not claim success from code inspection alone.
 
-- Storefront and shared integration: `npm run typecheck`,
-  `npm run test:whatsapp-integration`, and `npm run build`.
-- Voice backend: `npm --prefix voice-service run typecheck`,
-  `npm --prefix voice-service run test`, and
-  `npm --prefix voice-service run build`.
-- Standalone WhatsApp deploy artifact:
-  `npm --prefix voice-service run build:whatsapp`.
-- Production voice checks start with `/health` and `/ready`, but those endpoints do
-  not prove external credentials, telephony, messaging, or payments work. When the
-  task requires production confidence, complete the requested live limited trial
-  and verify its full external path.
+- Storefront, API and console: `npm run typecheck`, `npm run test`,
+  `npm run test:schema`, and `npm run build`.
+- Production API checks start with `/healthz`, but that does not prove external
+  credentials, messaging, or payments work. When the task requires production
+  confidence, complete the requested live limited trial and verify its full
+  external path.
 - For database changes, apply migrations in dependency order and verify the real
   affected query/RPC/Edge Function path in addition to local schema tests.
 
@@ -133,9 +110,3 @@ work. Do not claim success from code inspection alone.
   the corresponding verified cutover.
 - `CLAUDE.md`: owner operating rules shared with other coding agents.
 - `design.md`: brand tokens, typography, interaction conventions, and page layout.
-- `walkthrough.md`: recent WhatsApp production bug investigation and regression
-  coverage.
-- `voice-service/README.md`: architecture, deployment, provider configuration,
-  checkout/payment boundaries, and accepted tradeoffs.
-- `whatsapp-chatbot/README.md`: worker, callback, alerting, and separate deployment
-  behavior.

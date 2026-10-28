@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, Plus, Package, Eye, Trash2, X, Leaf, UploadCloud, Users } from "lucide-react";
+import { Search, Filter, Plus, Package, Eye, Trash2, X, Leaf, UploadCloud, Users, Star, CheckCircle2, IndianRupee, Tag, Info, ClipboardList, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -426,34 +426,58 @@ export default function AdminProducts() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
               transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-0 md:inset-x-20 md:inset-y-8 max-w-5xl mx-auto z-50 bg-background md:rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+              className="fixed inset-0 md:inset-x-8 md:inset-y-6 lg:inset-x-16 lg:inset-y-8 max-w-6xl mx-auto z-50 bg-[#FAF9F5] md:rounded-3xl overflow-hidden flex flex-col shadow-2xl border border-black/10"
             >
-              <div className="flex items-center justify-between px-6 md:px-8 h-16 border-b border-border/30 shrink-0">
+              {/* ── Modal Header ────────────────────────────────────── */}
+              <header className="flex items-center justify-between px-6 md:px-8 h-[68px] border-b border-black/8 shrink-0 bg-white">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"><Leaf className="w-4 h-4 text-primary" strokeWidth={1.5} /></div>
-                  <h2 className="text-sm font-serif font-bold text-foreground">{editId ? "Edit Product" : "Add New Product"}</h2>
+                  <div className="w-9 h-9 rounded-xl bg-[#0E1F13] flex items-center justify-center">
+                    <Leaf className="w-4 h-4 text-white" strokeWidth={1.75} />
+                  </div>
+                  <div>
+                    <h2 className="font-dm text-lg text-black leading-tight tracking-[-0.02em]">
+                      {editId ? "Edit product" : "Add new product"}
+                    </h2>
+                    <p className="text-[11px] font-inter text-black/50 leading-tight">
+                      Everything you fill in shows up on the product detail page live.
+                    </p>
+                  </div>
                 </div>
-                <button onClick={() => { setShowForm(false); setEditId(null); }} className="p-2 rounded-full hover:bg-muted transition-colors"><X className="w-5 h-5 text-foreground/60" /></button>
-              </div>
+                <button
+                  onClick={() => { setShowForm(false); setEditId(null); }}
+                  className="p-2 rounded-full hover:bg-black/5 transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-black/60" />
+                </button>
+              </header>
 
-              <div className="flex-1 overflow-y-auto">
-                <div className="flex flex-col lg:flex-row min-h-full">
-                  <div className="lg:w-[40%] bg-[#fafaf8] p-8 lg:p-10 flex flex-col items-center justify-start border-b lg:border-b-0 lg:border-r border-border/20">
-                    <div className="w-full max-w-xs">
-                      <h3 className="text-xs font-semibold text-foreground/50 uppercase tracking-widest mb-4 text-center">Product Images</h3>
+              <div className="flex-1 overflow-hidden">
+                <div className="grid grid-cols-1 lg:grid-cols-12 h-full">
 
+                  {/* ── Left: Live Preview + Image Upload ─────────────── */}
+                  <aside className="lg:col-span-5 border-b lg:border-b-0 lg:border-r border-black/8 bg-[#FAF9F5] overflow-y-auto">
+                    <div className="p-6 md:p-8 lg:p-10">
+                      <div className="flex items-center gap-2 mb-5">
+                        <ImageIcon className="w-3.5 h-3.5 text-black/40" />
+                        <span className="text-[10px] font-inter font-semibold tracking-[0.2em] uppercase text-black/45">
+                          Gallery &amp; live preview
+                        </span>
+                      </div>
+
+                      {/* Primary image well — mirrors the PDP main image */}
                       <div
                         onClick={() => document.getElementById("multi-img-input")?.click()}
                         onDragOver={(e) => {
                           e.preventDefault();
-                          e.currentTarget.classList.add("border-primary", "bg-primary/[0.04]");
+                          e.currentTarget.classList.add("border-[#0E1F13]", "bg-[#0E1F13]/[0.03]");
                         }}
                         onDragLeave={(e) => {
-                          e.currentTarget.classList.remove("border-primary", "bg-primary/[0.04]");
+                          e.currentTarget.classList.remove("border-[#0E1F13]", "bg-[#0E1F13]/[0.03]");
                         }}
                         onDrop={(e) => {
                           e.preventDefault();
-                          e.currentTarget.classList.remove("border-primary", "bg-primary/[0.04]");
+                          e.currentTarget.classList.remove("border-[#0E1F13]", "bg-[#0E1F13]/[0.03]");
                           const files = e.dataTransfer.files;
                           if (files) {
                             const validFiles = Array.from(files).filter(f => f.size <= 5 * 1024 * 1024);
@@ -465,27 +489,40 @@ export default function AdminProducts() {
                             setSelectedFiles(validFiles);
                           }
                         }}
-                        className="rounded-2xl border-2 border-dashed border-border/50 bg-white flex flex-col items-center justify-center cursor-pointer hover:border-primary/40 hover:bg-primary/[0.02] transition-all group relative overflow-hidden h-[380px]"
+                        className="relative aspect-square w-full rounded-3xl border-2 border-dashed border-black/15 bg-[#F3F1EA] cursor-pointer hover:border-[#0E1F13]/40 transition-all group overflow-hidden"
                       >
+                        {/* PDP-style badge chip */}
+                        {form.badge && (
+                          <span className="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-full bg-[#0E1F13] text-white text-[10px] font-inter font-semibold tracking-[0.2em] uppercase shadow-sm pointer-events-none">
+                            {form.badge}
+                          </span>
+                        )}
+                        {discount > 0 && (
+                          <span className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-full bg-white text-[#0E1F13] border border-black/10 text-xs font-inter font-bold tracking-wide shadow-sm pointer-events-none">
+                            Save {discount}%
+                          </span>
+                        )}
+
                         {images.length > 0 ? (
-                          <div className="w-full h-full p-4 flex items-center justify-center relative">
-                            <img src={images[0]} alt="Primary" className="max-w-full max-h-full object-contain" />
+                          <>
+                            <img src={images[0]} alt="Primary" className="w-full h-full object-cover" />
                             {uploading && (
-                              <div className="absolute inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center text-white text-xs font-semibold gap-2">
+                              <div className="absolute inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center text-white text-xs font-semibold gap-2">
                                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                Uploading to storage...
+                                Uploading to storage…
                               </div>
                             )}
-                          </div>
+                          </>
                         ) : (
-                          <div className="text-center p-4">
-                            <div className="w-12 h-12 rounded-xl bg-primary/8 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-                              <UploadCloud className="w-5 h-5 text-primary/50" />
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                            <div className="w-14 h-14 rounded-2xl bg-white border border-black/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                              <UploadCloud className="w-6 h-6 text-[#0E1F13]/60" />
                             </div>
-                            <p className="text-xs text-foreground/40 font-medium">Click or drag images here</p>
-                            <p className="text-[10px] text-foreground/25 mt-1">PNG, JPG, WEBP up to 5MB</p>
+                            <p className="text-sm font-inter font-medium text-black/70">Drop images here</p>
+                            <p className="text-[11px] font-inter text-black/40 mt-1">or click to browse — up to 5MB each</p>
                           </div>
                         )}
+
                         <input
                           id="multi-img-input"
                           type="file"
@@ -507,11 +544,12 @@ export default function AdminProducts() {
                         />
                       </div>
 
+                      {/* Thumbnail rail (secondary images) */}
                       {images.length > 1 && (
-                        <div className="grid grid-cols-4 gap-2 mt-4">
+                        <div className="grid grid-cols-5 gap-2 mt-3">
                           {images.slice(1).map((src, i) => (
-                            <div key={i} className="aspect-square rounded-xl border border-border/30 bg-white p-2 relative group/img">
-                              <img src={src} alt="" className="w-full h-full object-contain" />
+                            <div key={i} className="aspect-square rounded-xl border border-black/10 bg-white p-1.5 relative">
+                              <img src={src} alt="" className="w-full h-full object-cover rounded-md" />
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -519,7 +557,7 @@ export default function AdminProducts() {
                                   setImages((prev) => prev.filter((_, idx) => idx !== i + 1));
                                   setSelectedFiles((prev) => prev.filter((_, idx) => idx !== i + 1));
                                 }}
-                                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity shadow-sm"
+                                className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity shadow-sm"
                               >
                                 <X className="w-3 h-3" strokeWidth={2} />
                               </button>
@@ -527,168 +565,430 @@ export default function AdminProducts() {
                           ))}
                         </div>
                       )}
-
                       {images.length > 0 && (
                         <button
                           type="button"
-                          onClick={() => {
-                            setImages([]);
-                            setSelectedFiles([]);
-                          }}
-                          className="w-full text-xs text-foreground/30 hover:text-red-500 transition-colors py-2 mt-2"
+                          onClick={() => { setImages([]); setSelectedFiles([]); }}
+                          className="w-full text-[11px] font-inter text-black/40 hover:text-rose-500 transition-colors py-2 mt-2"
                         >
                           Clear all images ({images.length})
                         </button>
                       )}
 
-                      <div className="mt-6 pt-6 border-t border-border/20">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-foreground/80">{form.price ? `₹${form.price}` : ""}</div>
-                          <div className="flex items-center justify-center gap-2 mt-1">
-                            {form.mrp && <span className="text-xs text-foreground/30 line-through">{form.mrp}</span>}
-                            {discount > 0 && <span className="text-xs font-bold text-accent">-{discount}%</span>}
-                          </div>
-                          {form.name && (
-                            <p className="text-xs text-foreground/50 mt-3 font-medium line-clamp-2">{form.name}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                      {/* Live PDP preview card (matches product-detail.tsx layout) */}
+                      <div className="mt-8 rounded-3xl bg-white border border-black/8 p-6">
+                        <span className="block text-[10px] font-inter font-semibold tracking-[0.2em] uppercase text-black/45 mb-3">
+                          Detail page preview
+                        </span>
+                        {form.tag && (
+                          <p className="font-inter text-[10px] font-semibold tracking-[0.2em] uppercase text-emerald-900 mb-1.5">
+                            {form.tag}
+                          </p>
+                        )}
+                        <h3 className="font-dm text-2xl font-normal tracking-[-0.02em] text-black leading-tight">
+                          {form.name || <span className="text-black/25">Product name will appear here</span>}
+                        </h3>
 
-                  <div className="lg:w-[60%] p-6 md:p-10 overflow-y-auto">
-                    <div className="max-w-xl mx-auto space-y-5">
-                      <div>
-                        <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Product Name *</label>
-                        <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Organic Moringa Powder" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25" />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">MRP () *</label>
-                          <input type="number" value={form.mrp} onChange={(e) => setForm({ ...form, mrp: e.target.value })} placeholder="999" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Selling Price () *</label>
-                          <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="699" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-                        </div>
-                      </div>
-
-                      {form.mrp && form.price && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <span className="px-2 py-1 rounded-lg bg-accent/10 text-accent font-bold">{discount}% discount</span>
-                          <span className="text-foreground/40">Savings: {Math.max(0, parseFloat(form.mrp) - parseFloat(form.price))}</span>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Tag / Subtitle</label>
-                          <input type="text" value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} placeholder="500mg · 90 Capsules" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Badge</label>
-                          <input type="text" value={form.badge} onChange={(e) => setForm({ ...form, badge: e.target.value })} placeholder="Best Seller, New, etc." className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Category *</label>
-                          <input type="text" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="e.g. moringa, amla" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">HSN Code *</label>
-                          <input type="text" required value={form.hsn_code} onChange={(e) => setForm({ ...form, hsn_code: e.target.value })} placeholder="12119029" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25" />
-                        </div>
-                      </div>
-
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Stock Quantity</label>
-                          <input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="50" className="w-full h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all placeholder:text-foreground/25 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Stock Status</label>
-                          <div className="flex gap-1 bg-white border border-border/40 rounded-xl p-1 h-11">
-                            {[
-                              { value: "In Stock", label: "In Stock", color: "text-green-700" },
-                              { value: "Low Stock", label: "Low", color: "text-amber-700" },
-                              { value: "Out of Stock", label: "Out", color: "text-red-600" },
-                            ].map((opt) => (
-                              <button
-                                key={opt.value}
-                                type="button"
-                                onClick={() => setForm({ ...form, stockText: opt.value })}
-                                className={`flex-1 rounded-lg text-[10px] font-semibold transition-all ${
-                                  form.stockText === opt.value
-                                    ? "bg-primary text-white shadow-sm"
-                                    : `${opt.color} hover:bg-muted/50`
+                        {/* Rating row */}
+                        <div className="flex items-center gap-2 mt-3">
+                          <div className="flex items-center gap-0.5">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-3.5 h-3.5 ${
+                                  i < Math.floor(parseFloat(form.rating || "0"))
+                                    ? "fill-amber-500 text-amber-500"
+                                    : "fill-amber-500/20 text-amber-500/30"
                                 }`}
-                              >
-                                {opt.label}
-                              </button>
+                              />
                             ))}
                           </div>
+                          <span className="text-xs font-inter font-semibold text-black">
+                            {form.rating || "4.9"}
+                          </span>
                         </div>
-                        <div>
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Rating</label>
-                          <div className="flex items-center gap-2 h-11 bg-white border border-border/40 rounded-xl px-3 outline-none focus-within:border-primary/30 focus-within:ring-2 focus-within:ring-primary/5 transition-all">
-                            <input 
-                              type="number" 
-                              step="0.1" 
-                              min="0" 
-                              max="5" 
-                              value={form.rating} 
-                              onChange={(e) => setForm({ ...form, rating: e.target.value })} 
-                              placeholder="4.5" 
-                              className="w-10 bg-transparent text-sm outline-none placeholder:text-foreground/25 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" 
-                            />
-                            <span className="text-[10px] font-semibold text-foreground/45 whitespace-nowrap">/ 5 stars</span>
-                          </div>
-                        </div>
-                      </div>
 
-                      <div>
-                        <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider mb-1.5 block">Description</label>
-                        <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} placeholder="Describe the product..." className="w-full px-4 py-3 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 focus:ring-2 focus:ring-primary/5 transition-all resize-none placeholder:text-foreground/25" />
-                      </div>
-
-                      <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-xs font-semibold text-foreground/60 uppercase tracking-wider">Highlights / Key Features</label>
-                          <button type="button" onClick={addHighlight} className="text-xs text-primary hover:text-primary/70 font-medium flex items-center gap-1">
-                            <Plus className="w-3 h-3" strokeWidth={2} /> Add
-                          </button>
+                        {/* Price row */}
+                        <div className="mt-4 flex items-baseline gap-2">
+                          <span className="font-dm text-2xl font-normal text-[#0E1F13] tracking-tight">
+                            {form.price ? `₹${form.price}` : <span className="text-black/25">₹—</span>}
+                          </span>
+                          {form.mrp && parseFloat(form.mrp) > parseFloat(form.price || "0") && (
+                            <span className="font-inter text-sm line-through text-black/40">₹{form.mrp}</span>
+                          )}
+                          {discount > 0 && (
+                            <span className="text-[10px] font-inter font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                              -{discount}%
+                            </span>
+                          )}
                         </div>
-                        <div className="space-y-2">
-                          {form.highlights.map((h, i) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={h}
-                                onChange={(e) => setHighlight(i, e.target.value)}
-                                placeholder={`Highlight ${i + 1}`}
-                                className="flex-1 h-11 px-4 text-sm bg-white border border-border/40 rounded-xl outline-none focus:border-primary/30 transition-all placeholder:text-foreground/25"
-                              />
-                              {form.highlights.length > 1 && (
-                                <button onClick={() => removeHighlight(i)} className="p-2 rounded-lg hover:bg-red-50 text-foreground/30 hover:text-red-500 transition-colors">
-                                  <X className="w-4 h-4" strokeWidth={1.5} />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
 
-                      <div className="flex items-center justify-end gap-3 pt-5 border-t border-border/20">
-                        <Button variant="outline" onClick={() => { setShowForm(false); setEditId(null); }} className="h-11 px-6">Cancel</Button>
-                        <Button onClick={handleSubmit} className="h-11 px-8 gap-2 shadow-md">
-                          <Leaf className="w-4 h-4" strokeWidth={1.5} />
-                          {editId ? "Save Changes" : "Create Product"}
-                        </Button>
+                        {form.description && (
+                          <p className="mt-4 font-inter text-xs text-black/70 leading-relaxed line-clamp-3">
+                            {form.description}
+                          </p>
+                        )}
+
+                        {/* Highlights preview */}
+                        {form.highlights.filter((h) => h.trim()).length > 0 && (
+                          <ul className="mt-4 space-y-1.5">
+                            {form.highlights.filter((h) => h.trim()).slice(0, 4).map((h, i) => (
+                              <li key={i} className="flex items-start gap-2 text-[11px] font-inter text-black/75">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                                <span>{h}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
                       </div>
                     </div>
+                  </aside>
+
+                  {/* ── Right: Form Sections ───────────────────────────── */}
+                  <div className="lg:col-span-7 overflow-y-auto">
+                    <div className="p-6 md:p-8 lg:p-10 pb-32 space-y-6 max-w-2xl mx-auto">
+
+                      {/* SECTION 1 — Identity */}
+                      <section className="bg-white rounded-2xl border border-black/8 p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                          <Tag className="w-3.5 h-3.5 text-black/50" />
+                          <h3 className="font-inter text-xs font-semibold tracking-[0.2em] uppercase text-black/60">
+                            Identity
+                          </h3>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              Product name <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={form.name}
+                              onChange={(e) => setForm({ ...form, name: e.target.value })}
+                              placeholder="e.g. Morilife+ Moringa Leaf Tablets"
+                              className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30"
+                            />
+                            <p className="text-[10px] font-inter text-black/40 mt-1.5">
+                              The big serif title on the PDP.
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                                Tag / subtitle
+                              </label>
+                              <input
+                                type="text"
+                                value={form.tag}
+                                onChange={(e) => setForm({ ...form, tag: e.target.value })}
+                                placeholder="500mg · 90 Capsules"
+                                className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30"
+                              />
+                              <p className="text-[10px] font-inter text-black/40 mt-1.5">
+                                Small overline shown above the title.
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                                Badge
+                              </label>
+                              <input
+                                type="text"
+                                value={form.badge}
+                                onChange={(e) => setForm({ ...form, badge: e.target.value })}
+                                placeholder="New, Best Seller…"
+                                className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30"
+                              />
+                              <p className="text-[10px] font-inter text-black/40 mt-1.5">
+                                Dark pill chip on the hero image.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* SECTION 2 — Pricing */}
+                      <section className="bg-white rounded-2xl border border-black/8 p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                          <IndianRupee className="w-3.5 h-3.5 text-black/50" />
+                          <h3 className="font-inter text-xs font-semibold tracking-[0.2em] uppercase text-black/60">
+                            Pricing
+                          </h3>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              MRP (₹) <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              value={form.mrp}
+                              onChange={(e) => setForm({ ...form, mrp: e.target.value })}
+                              placeholder="999"
+                              className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              Selling price (₹) <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="number"
+                              value={form.price}
+                              onChange={(e) => setForm({ ...form, price: e.target.value })}
+                              placeholder="699"
+                              className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
+                          </div>
+                        </div>
+
+                        {form.mrp && form.price && discount > 0 && (
+                          <div className="mt-4 p-3 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                              <span className="text-xs font-inter font-semibold text-emerald-900">
+                                {discount}% off
+                              </span>
+                            </div>
+                            <span className="text-xs font-inter text-emerald-800">
+                              Customer saves ₹{Math.max(0, parseFloat(form.mrp) - parseFloat(form.price)).toFixed(0)}
+                            </span>
+                          </div>
+                        )}
+                      </section>
+
+                      {/* SECTION 3 — Story (matches PDP description + highlights) */}
+                      <section className="bg-white rounded-2xl border border-black/8 p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                          <ClipboardList className="w-3.5 h-3.5 text-black/50" />
+                          <h3 className="font-inter text-xs font-semibold tracking-[0.2em] uppercase text-black/60">
+                            Story on the page
+                          </h3>
+                        </div>
+
+                        <div className="space-y-5">
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              Description
+                            </label>
+                            <textarea
+                              value={form.description}
+                              onChange={(e) => setForm({ ...form, description: e.target.value })}
+                              rows={4}
+                              placeholder="A short paragraph the buyer sees under the price. Keep it warm and specific."
+                              className="w-full px-4 py-3 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all resize-none placeholder:text-black/30 leading-relaxed"
+                            />
+                          </div>
+
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <label className="text-xs font-inter font-semibold text-black/70">
+                                Key highlights
+                              </label>
+                              <button
+                                type="button"
+                                onClick={addHighlight}
+                                className="inline-flex items-center gap-1 text-xs font-inter font-semibold text-[#0E1F13] hover:text-[#2E5B32] transition-colors"
+                              >
+                                <Plus className="w-3 h-3" strokeWidth={2.5} /> Add row
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              {form.highlights.map((h, i) => (
+                                <div key={i} className="flex items-center gap-2 group">
+                                  <span className="shrink-0 w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                  </span>
+                                  <input
+                                    type="text"
+                                    value={h}
+                                    onChange={(e) => setHighlight(i, e.target.value)}
+                                    placeholder={`Highlight ${i + 1}`}
+                                    className="flex-1 h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30"
+                                  />
+                                  {form.highlights.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeHighlight(i)}
+                                      className="p-2 rounded-lg text-black/30 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                                      aria-label="Remove highlight"
+                                    >
+                                      <X className="w-4 h-4" strokeWidth={1.75} />
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                            <p className="text-[10px] font-inter text-black/40 mt-2">
+                              Shown as a two-column checkmark list under the description on the PDP.
+                            </p>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* SECTION 4 — Rating & Reviews */}
+                      <section className="bg-white rounded-2xl border border-black/8 p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                          <Star className="w-3.5 h-3.5 text-black/50" />
+                          <h3 className="font-inter text-xs font-semibold tracking-[0.2em] uppercase text-black/60">
+                            Rating
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2 h-11 bg-[#FAF9F5] border border-black/10 rounded-xl px-4 flex-1 focus-within:border-[#0E1F13] focus-within:bg-white transition-all">
+                            <input
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max="5"
+                              value={form.rating}
+                              onChange={(e) => setForm({ ...form, rating: e.target.value })}
+                              placeholder="4.5"
+                              className="w-14 bg-transparent text-sm outline-none placeholder:text-black/30 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
+                            <span className="text-[10px] font-inter font-semibold text-black/40 uppercase tracking-wider">
+                              / 5 stars
+                            </span>
+                            <div className="ml-auto flex items-center gap-0.5">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-3.5 h-3.5 ${
+                                    i < Math.floor(parseFloat(form.rating || "0"))
+                                      ? "fill-amber-500 text-amber-500"
+                                      : "fill-amber-500/20 text-amber-500/30"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-[10px] font-inter text-black/40 mt-2">
+                          Live reviews eventually override this; use it as a seed value.
+                        </p>
+                      </section>
+
+                      {/* SECTION 5 — Inventory */}
+                      <section className="bg-white rounded-2xl border border-black/8 p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                          <Package className="w-3.5 h-3.5 text-black/50" />
+                          <h3 className="font-inter text-xs font-semibold tracking-[0.2em] uppercase text-black/60">
+                            Inventory
+                          </h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              Stock quantity
+                            </label>
+                            <input
+                              type="number"
+                              value={form.stock}
+                              onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                              placeholder="50"
+                              className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              Displayed status
+                            </label>
+                            <div className="flex gap-1 bg-[#FAF9F5] border border-black/10 rounded-xl p-1 h-11">
+                              {[
+                                { value: "In Stock",     label: "In stock",     color: "text-emerald-800" },
+                                { value: "Low Stock",    label: "Low",          color: "text-amber-800" },
+                                { value: "Out of Stock", label: "Out",          color: "text-rose-700" },
+                              ].map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => setForm({ ...form, stockText: opt.value })}
+                                  className={`flex-1 rounded-lg text-[11px] font-inter font-semibold transition-all ${
+                                    form.stockText === opt.value
+                                      ? "bg-[#0E1F13] text-white shadow-sm"
+                                      : `${opt.color} hover:bg-white`
+                                  }`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* SECTION 6 — Ops & Taxonomy */}
+                      <section className="bg-white rounded-2xl border border-black/8 p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                          <Info className="w-3.5 h-3.5 text-black/50" />
+                          <h3 className="font-inter text-xs font-semibold tracking-[0.2em] uppercase text-black/60">
+                            Operations
+                          </h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              Category <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={form.category}
+                              onChange={(e) => setForm({ ...form, category: e.target.value })}
+                              placeholder="moringa, amla…"
+                              className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-inter font-semibold text-black/70 mb-1.5 block">
+                              HSN code <span className="text-rose-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={form.hsn_code}
+                              onChange={(e) => setForm({ ...form, hsn_code: e.target.value })}
+                              placeholder="12119029"
+                              className="w-full h-11 px-4 text-sm bg-[#FAF9F5] border border-black/10 rounded-xl outline-none focus:border-[#0E1F13] focus:bg-white transition-all placeholder:text-black/30"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-[10px] font-inter text-black/40 mt-3">
+                          HSN drives GST on invoices — 12119029 is dried medicinal plant matter.
+                        </p>
+                      </section>
+
+                    </div>
                   </div>
+
                 </div>
               </div>
+
+              {/* ── Sticky footer action bar ────────────────────────── */}
+              <footer className="shrink-0 h-[68px] border-t border-black/8 bg-white px-6 md:px-8 flex items-center justify-between gap-4">
+                <p className="text-[11px] font-inter text-black/45 hidden sm:block">
+                  Preview updates as you type. Nothing is saved until you press{" "}
+                  <span className="font-semibold text-black/70">{editId ? "Save changes" : "Create product"}</span>.
+                </p>
+                <div className="flex items-center gap-3 ml-auto">
+                  <Button
+                    variant="outline"
+                    onClick={() => { setShowForm(false); setEditId(null); }}
+                    className="h-10 px-5 border-black/15 text-black/70 hover:bg-black/5"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSubmit}
+                    className="h-10 px-6 gap-2 bg-[#0E1F13] hover:bg-[#0E1F13]/90 text-white shadow-md"
+                  >
+                    <Leaf className="w-4 h-4" strokeWidth={1.75} />
+                    {editId ? "Save changes" : "Create product"}
+                  </Button>
+                </div>
+              </footer>
             </motion.div>
           </>
         )}

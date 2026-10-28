@@ -291,7 +291,7 @@ export default function AdminOrders() {
       setOrders((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, ...update } : o));
       setFiltered((prev) => prev.map((o) => o.id === selectedOrder.id ? { ...o, ...update } : o));
       setSelectedOrder((prev: any) => prev ? { ...prev, ...update } : prev);
-      toast({ title: "Tracking sent", description: "The tracking link was saved and sent to the customer on WhatsApp." });
+      toast({ title: "Tracking sent", description: "The tracking link was saved and emailed to the customer." });
     } catch (err: any) {
       toast({ title: "Tracking not sent", description: err.message || "Could not deliver the tracking link.", variant: "destructive" });
     } finally {
@@ -624,8 +624,8 @@ export default function AdminOrders() {
 
                     <button
                       type="button"
-                      disabled={!order.phone}
-                      title={order.phone ? "Add or update WhatsApp tracking" : "No WhatsApp phone number on this order"}
+                      disabled={!order.email}
+                      title={order.email ? "Add or update shipment tracking" : "No email address on this order"}
                       onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setTrackingLinkDraft(order.trackingUrl || ""); }}
                       className={`inline-flex h-9 items-center justify-center gap-2 rounded-xl border px-3 text-[10px] font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${order.trackingSentAt ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100" : "border-sky-200 bg-sky-50/60 text-sky-700 hover:bg-sky-100"}`}
                     >
@@ -1062,7 +1062,7 @@ export default function AdminOrders() {
                     Shipment Tracking
                   </h3>
                   <p className="text-[11px] text-foreground/50">
-                    Save the courier link and send it to the customer&apos;s WhatsApp number.
+                    Save the courier link and email it to the customer.
                     {selectedOrder.trackingSentAt ? " You can send an updated link again." : ""}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -1076,7 +1076,7 @@ export default function AdminOrders() {
                     <button
                       type="button"
                       onClick={sendTrackingUpdate}
-                      disabled={sendingTrackingId === selectedOrder.id || !selectedOrder.phone}
+                      disabled={sendingTrackingId === selectedOrder.id || !selectedOrder.email}
                       className="h-10 px-4 rounded-xl bg-sky-700 text-white text-xs font-semibold hover:bg-sky-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 shrink-0"
                     >
                       {sendingTrackingId === selectedOrder.id
@@ -1085,7 +1085,7 @@ export default function AdminOrders() {
                       {selectedOrder.trackingSentAt ? "Send Again" : "Save & Send"}
                     </button>
                   </div>
-                  {!selectedOrder.phone && <p className="text-[11px] text-rose-600">No WhatsApp phone number is saved for this order.</p>}
+                  {!selectedOrder.email && <p className="text-[11px] text-rose-600">No email address is saved for this order.</p>}
                   {selectedOrder.trackingSentAt && selectedOrder.trackingUrl && (
                     <a
                       href={selectedOrder.trackingUrl}

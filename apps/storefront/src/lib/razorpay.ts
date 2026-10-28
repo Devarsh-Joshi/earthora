@@ -4,16 +4,20 @@
 
 let _rzpScriptPromise: Promise<void> | null = null;
 
-/** Dynamically injects the Razorpay checkout.js once, returning a promise that resolves when ready. */
+/** Load the dedicated Magic Checkout SDK once. Standard checkout.js does not enable 1CC. */
 export function loadRazorpayScript(): Promise<void> {
-  if (window.Razorpay) return Promise.resolve();
+  if (document.querySelector('script[data-earthora-magic-checkout="loaded"]') && window.Razorpay) return Promise.resolve();
   if (_rzpScriptPromise) return _rzpScriptPromise;
   _rzpScriptPromise = new Promise<void>((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.src = 'https://checkout.razorpay.com/v1/magic-checkout.js';
     s.async = true;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error('Razorpay SDK failed to load.'));
+    s.onload = () => {
+      if (!window.Razorpay) { _rzpScriptPromise = null; reject(new Error('Magic Checkout SDK did not initialize.')); return; }
+      s.dataset.earthoraMagicCheckout = 'loaded';
+      resolve();
+    };
+    s.onerror = () => { s.remove(); _rzpScriptPromise = null; reject(new Error('Magic Checkout SDK failed to load.')); };
     document.head.appendChild(s);
   });
   return _rzpScriptPromise;
@@ -68,16 +72,14 @@ export interface OpenRazorpayModalOptions {
   currency: string;
   keyId: string;
   prefill?: { name?: string; email?: string; contact?: string };
-  /** Enable Razorpay Magic Checkout (1-click) — address is collected in the modal. */
-  oneClickCheckout?: boolean;
   onSuccess: (response: RazorpaySuccessResponse) => void;
   onFailure: (reason: string) => void;
+  onPaymentFailed?: (reason: string) => void;
   onDismiss?: () => void;
 }
 
 /**
- * Opens the Razorpay checkout modal. When `oneClickCheckout` is true, the modal
- * runs in Magic Checkout mode and collects the shipping address itself.
+ * Opens Magic Checkout; the modal collects the delivery address itself.
  */
 export function openRazorpayModal({
   orderId,
@@ -85,9 +87,9 @@ export function openRazorpayModal({
   currency,
   keyId,
   prefill,
-  oneClickCheckout,
   onSuccess,
   onFailure,
+  onPaymentFailed,
   onDismiss,
 }: OpenRazorpayModalOptions): void {
   if (!window.Razorpay) {
@@ -95,7 +97,11 @@ export function openRazorpayModal({
     return;
   }
 
-  const activeKeyId = keyId || (import.meta.env.VITE_RAZORPAY_KEY_ID as string) || 'rzp_test_1DP5mmOlF5G5ag';
+  const activeKeyId = keyId || (import.meta.env.VITE_RAZORPAY_KEY_ID as string);
+  if (!activeKeyId || !orderId?.startsWith('order_')) {
+    onFailure('Secure checkout is not configured. Please try again later.');
+    return;
+  }
 
   const options: Record<string, unknown> = {
     key: activeKeyId,
@@ -105,6 +111,10 @@ export function openRazorpayModal({
     description: 'Organic Moringa Products',
     image: '/favicon.svg',
     prefill,
+    order_id: orderId,
+    one_click_checkout: true,
+    // Promotions stay hidden until a promotion policy is enabled server-side.
+    show_coupons: false,
     theme: {
       color: '#3d6b3f',
     },
@@ -119,20 +129,13 @@ export function openRazorpayModal({
     },
   };
 
-  if (orderId && !orderId.startsWith('order_demo_')) {
-    options.order_id = orderId;
-  }
-
-  if (oneClickCheckout) {
-    options.one_click_checkout = true;
-    options.show_coupons = false;
-  }
-
   const rzp = new window.Razorpay(options);
 
   rzp.on('payment.failed', (response: RazorpayFailureResponse) => {
     const msg = response?.error?.description || 'Payment failed. Please try again.';
-    onFailure(msg);
+    // Razorpay keeps the modal open for a retry. Do not settle the checkout
+    // promise until the customer succeeds or dismisses the modal.
+    onPaymentFailed?.(msg);
   });
 
   rzp.open();

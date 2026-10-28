@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import { fetchCatalog } from '@/lib/api';
-import { getDiscountedPrice, fetchActiveDeals } from '@/lib/api';
-import type { CartItem, FestiveDeal } from '@/types';
+import type { CartItem } from '@/types';
 
 interface CartContextType {
   items: CartItem[];
@@ -9,7 +8,6 @@ interface CartContextType {
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-  applyVoiceItems: (items: CartItem[], scope: string[]) => void;
   cartCount: number;
 }
 
@@ -50,11 +48,6 @@ function loadCart(): CartItem[] {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>(loadCart);
-  const [deals, setDeals] = useState<FestiveDeal[]>([]);
-
-  useEffect(() => {
-    fetchActiveDeals().then(setDeals).catch(() => {});
-  }, []);
 
   useEffect(() => {
     localStorage.setItem(CART_KEY, JSON.stringify(consolidateCartItems(items)));
@@ -76,37 +69,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    if (items.length === 0 || deals.length === 0) return;
-
-    fetchCatalog()
-      .then(({ products }) => {
-        const data = products as unknown as Record<string, unknown>[];
-        if (!data) return;
-        setItems((prev) => {
-          let changed = false;
-          const next = prev.map((item) => {
-            const dbProd = data.find(
-              (p: Record<string, unknown>) => p.id === item.id || p.slug === item.id || p.id === item.name
-            );
-            if (!dbProd) return item;
-            const originalPrice = Number(dbProd.price);
-            const discounted = Math.min(
-              getDiscountedPrice(dbProd.id as string, originalPrice, deals),
-              getDiscountedPrice(dbProd.slug as string, originalPrice, deals)
-            );
-            if (item.price !== discounted) {
-              changed = true;
-              return { ...item, price: discounted };
-            }
-            return item;
-          });
-          return changed ? consolidateCartItems(next) : prev;
-        });
-      })
-      .catch(() => {});
-  }, [deals]);
 
   const addToCart = useCallback(
     (product: Omit<CartItem, 'quantity'>) => {
@@ -161,15 +123,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems([]);
   }, []);
 
-  const applyVoiceItems = useCallback((next: CartItem[], scope: string[]) => {
-    const selected = new Set(scope);
-    setItems(previous => consolidateCartItems([...previous.filter(item => !selected.has(item.id)), ...next]));
-  }, []);
-
   const cartCount = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, applyVoiceItems, cartCount }}>
+    <CartContext.Provider value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, cartCount }}>
       {children}
     </CartContext.Provider>
   );

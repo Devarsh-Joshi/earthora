@@ -15,13 +15,3 @@ export interface EmbeddingAdapter {
   readonly dims: number;
   embed(texts: string[]): Promise<number[][]>;
 }
-
-export interface SttAdapter {
-  readonly name: string;
-  transcribe(audio: Buffer, opts: { mime: string; languageHint?: string }): Promise<{ text: string; language?: string }>;
-}
-
-export interface TtsAdapter {
-  readonly name: string;
-  synthesize(text: string, opts: { language: string; voice?: string; format?: 'mp3' | 'wav' | 'pcm' }): Promise<{ audio: Buffer; mime: string }>;
-}

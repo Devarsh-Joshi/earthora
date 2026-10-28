@@ -1,5 +1,5 @@
 /**
- * Google adapters — Gemini (LLM + embeddings) and Chirp 3 STT/TTS.
+ * Google adapters — Gemini (LLM + embeddings).
  * Activated when GEMINI_API_KEY works (project currently returns 403) or a service-account JSON is present.
  * Until then the registry keeps OpenAI as the working default and these are selectable per channel.
  */

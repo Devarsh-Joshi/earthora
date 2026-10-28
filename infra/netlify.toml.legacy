@@ -2,30 +2,14 @@
   command = "npm run build"
   publish = "dist"
 
-[build.environment]
-  # Public API origin required by the editable voice-order review form.
-  VITE_VOICE_SERVICE_URL = "https://earthorafarms-mhwv.onrender.com"
-
 [functions]
   directory = "netlify/functions"
   external_node_modules = ["pdf-lib", "nodemailer"]
-
-# GitHub's scheduled workflow is best-effort and has skipped multiple runs.
-# Use Netlify's scheduler as the primary external heartbeat so the free Render
-# voice service receives traffic comfortably inside its idle window.
-[functions."keep-render-awake"]
-  schedule = "*/5 * * * *"
 
 [[redirects]]
   from = "https://earthorafarms.netlify.app/*"
   to = "https://earthorafarms.com/:splat"
   status = 301
-  force = true
-
-[[redirects]]
-  from = "/api/voice/*"
-  to = "https://earthorafarms-mhwv.onrender.com/:splat"
-  status = 200
   force = true
 
 [[redirects]]

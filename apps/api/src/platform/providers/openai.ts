@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { config } from '../../config.js';
-import type { ChatMessage, ChatResult, EmbeddingAdapter, LlmAdapter, SttAdapter, ToolCall, ToolDef, TtsAdapter } from './types.js';
+import type { ChatMessage, ChatResult, EmbeddingAdapter, LlmAdapter, ToolCall, ToolDef } from './types.js';
 
 let client: OpenAI | null = null;
 function oai(): OpenAI {
@@ -76,23 +76,4 @@ export const openaiEmbedding: EmbeddingAdapter = {
   },
 };
 
-export const openaiStt: SttAdapter = {
-  name: 'openai',
-  async transcribe(audio, opts) {
-    const file = new File([new Uint8Array(audio)], `audio.${extFor(opts.mime)}`, { type: opts.mime });
-    const res = await oai().audio.transcriptions.create({ file: file as any, model: 'whisper-1', language: opts.languageHint });
-    return { text: res.text };
-  },
-};
-
-export const openaiTts: TtsAdapter = {
-  name: 'openai',
-  async synthesize(text, opts) {
-    const res = await oai().audio.speech.create({ model: 'gpt-4o-mini-tts', voice: (opts.voice as any) || 'shimmer', input: text.slice(0, 4000), response_format: (opts.format === 'wav' ? 'wav' : 'mp3') as any });
-    const buf = Buffer.from(await res.arrayBuffer());
-    return { audio: buf, mime: opts.format === 'wav' ? 'audio/wav' : 'audio/mpeg' };
-  },
-};
-
 function safeJson(s: string): Record<string, unknown> { try { return JSON.parse(s || '{}'); } catch { return {}; } }
-function extFor(mime: string): string { if (mime.includes('webm')) return 'webm'; if (mime.includes('wav')) return 'wav'; if (mime.includes('mp3') || mime.includes('mpeg')) return 'mp3'; if (mime.includes('ogg')) return 'ogg'; return 'webm'; }

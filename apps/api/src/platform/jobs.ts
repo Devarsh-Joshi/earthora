@@ -5,7 +5,6 @@ import { config } from '../config.js';
 import { sql } from '../db/client.js';
 import { localAssetPath } from '../lib/assets.js';
 import { brandedEmail, escapeHtml, sendEmail } from '../lib/email.js';
-import { isStudioNotification, sendStudioEmail } from '../lib/studioEmail.js';
 import { registerJobHandler, registerSchedule } from '../modules/jobs/worker.js';
 import { getEmbedding } from './providers/index.js';
 import { crawlWebsite, ingestFile, pagesCollectionId, productsCollectionId, removeStaleProductDocuments, syncPageDocuments, syncProductDocuments, tenantId } from './kb/ingest.js';
@@ -86,11 +85,7 @@ export function registerPlatformJobs(): void {
       <p style="color:#3b4a40">Reason: ${escapeHtml(p.reason)}</p>
       <p><a href="${config.PUBLIC_CONSOLE_URL}/platform/conversations/${p.conversationId}">Open the conversation</a></p>`);
     const email = { to: config.ADMIN_NOTIFY_EMAIL, kind: 'escalation', subject: `Callback request — ${p.contact.name || 'customer'}`, html };
-    const id = isStudioNotification(job.dedupe_key) ? await sendStudioEmail(job.dedupe_key, 'callback', email) : await sendEmail(email);
+    const id = await sendEmail(email);
     return { emailId: id };
   });
-
-  // WhatsApp send jobs (Tata Omni) — replace the old low-stock/tracking WhatsApp worker sends.
-  registerJobHandler('whatsapp_low_stock', async () => ({ skipped: 'wired in whatsapp channel' }));
-  registerJobHandler('whatsapp_tracking', async () => ({ skipped: 'wired in whatsapp channel' }));
 }

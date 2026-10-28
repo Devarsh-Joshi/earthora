@@ -9,9 +9,9 @@ import { conflict } from '../../lib/errors.js';
 import { enqueueJob } from '../jobs/queue.js';
 import type { PricedCart } from './pricing.js';
 
-export type OrderSource = 'website' | 'offline' | 'voice_agent' | 'whatsapp' | 'chat';
+export type OrderSource = 'website' | 'offline' | 'chat';
 
-const PREFIX: Record<OrderSource, string> = { website: 'WEB', offline: 'OFF', voice_agent: 'VA', whatsapp: 'WA', chat: 'CH' };
+const PREFIX: Record<OrderSource, string> = { website: 'WEB', offline: 'OFF', chat: 'CH' };
 
 export function newOrderNumber(source: OrderSource): string {
   return `${PREFIX[source]}-${randomBytes(5).toString('hex').toUpperCase()}`;
@@ -40,6 +40,8 @@ export async function finalizeOrder(input: FinalizeInput): Promise<FinalizedOrde
   const status = input.status ?? (input.payment.status === 'completed' ? 'processing' : 'pending');
 
   const result = await sql.begin(async (tx) => {
+    // Serialize finalization attempts for the same provider transaction.
+    await tx`SELECT pg_advisory_xact_lock(hashtextextended(${input.payment.transactionId}, 0))`;
     const existing = await tx<{ payment_order_id: string }[]>`SELECT payment_order_id FROM "Payments" WHERE payment_transaction_id = ${input.payment.transactionId} LIMIT 1`;
     if (existing[0]) return { orderId: existing[0].payment_order_id, created: false };
 
@@ -50,20 +52,16 @@ export async function finalizeOrder(input: FinalizeInput): Promise<FinalizedOrde
                  user_city = EXCLUDED.user_city, user_state = EXCLUDED.user_state, user_zip = EXCLUDED.user_zip, user_country = EXCLUDED.user_country, user_updated_at = now()`;
     }
     await tx`INSERT INTO orders (id, order_number, user_id, status, total_amount, shipping_address, customer_name, customer_email, customer_phone, customer_address,
-               customer_city, customer_state, customer_zip, customer_country, customer_gst, coupon_code, discount_amount)
+               customer_city, customer_state, customer_zip, customer_country, customer_gst)
              VALUES (${orderId}, ${orderId}, ${customer.email || customer.phone || 'guest'}, ${status}, ${cart.total},
                ${sql.json({ name: customer.name, email: customer.email, phone: customer.phone, address: customer.address, city: customer.city, state: customer.state, zip: customer.zip, country: customer.country, source: input.source, ...(input.notes ?? {}) } as any)},
-               ${customer.name}, ${customer.email}, ${customer.phone}, ${customer.address}, ${customer.city}, ${customer.state}, ${customer.zip}, ${customer.country}, ${customer.gst ?? ''},
-               ${cart.couponCode}, ${cart.discount})`;
+               ${customer.name}, ${customer.email}, ${customer.phone}, ${customer.address}, ${customer.city}, ${customer.state}, ${customer.zip}, ${customer.country}, ${customer.gst ?? ''})`;
     for (const line of cart.lines) {
       await tx`INSERT INTO order_items (order_id, product_id, quantity, unit_price, total_price) VALUES (${orderId}, ${line.productId}, ${line.quantity}, ${line.unitPrice}, ${line.lineTotal})`;
     }
     await tx`INSERT INTO "Payments" (payment_order_id, payment_amount, payment_status, payment_method, payment_transaction_id, payment_context)
              VALUES (${orderId}, ${String(input.payment.amount)}, ${input.payment.status}, ${input.payment.method}, ${input.payment.transactionId}, ${sql.json((input.payment.context ?? {}) as any)})`;
     await tx`INSERT INTO "Order_history" (order_id, order_status) VALUES (${orderId}, ${status})`;
-    if (cart.couponCode) {
-      await tx`UPDATE coupon_details SET coupon_used_count = COALESCE(coupon_used_count,0) + 1 WHERE upper(coupon_code) = upper(${cart.couponCode})`;
-    }
     return { orderId, created: true };
   });
 

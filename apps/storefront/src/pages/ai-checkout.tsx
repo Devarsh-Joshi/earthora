@@ -16,13 +16,13 @@ export default function AiCheckout({params}: {params: {token: string}}) {
   useEffect(() => {
     let cancelled = false;
     setReview(null); setError('');
-    api<Review>('/api/platform/voice/checkout/' + encodeURIComponent(params.token)).then(value => {if (!cancelled) setReview(value);}).catch(() => {if (!cancelled) setError('This review link is unavailable or expired. Ask Eva to prepare a new checkout.');});
+    api<Review>('/api/platform/checkout/' + encodeURIComponent(params.token)).then(value => {if (!cancelled) setReview(value);}).catch(() => {if (!cancelled) setError('This review link is unavailable or expired. Ask Eva to prepare a new checkout.');});
     return () => {cancelled = true;};
   }, [params.token]);
   const total = review?.items.reduce((sum,item) => sum + item.unitPrice * item.quantity, 0) ?? 0;
   return <div className="min-h-[100dvh] flex flex-col bg-[#FAF9F5] text-black">
     <Navbar />
-    <main className="flex-1 pt-32 pb-20 px-6 w-full max-w-3xl mx-auto" data-voice-checkout-ready={error ? 'false' : review ? 'true' : undefined}>
+    <main className="flex-1 pt-32 pb-20 px-6 w-full max-w-3xl mx-auto">
       <h1 className="font-dm text-3xl sm:text-4xl mb-3">Review your order</h1>
       <p className="text-sm text-black/60 mb-8">Eva has prepared your items and delivery details. Review them below, then complete payment yourself in secure checkout.</p>
       {error && <p role="alert" className="p-4 border border-red-200 bg-red-50 rounded-xl text-red-800">{error}</p>}
@@ -31,7 +31,7 @@ export default function AiCheckout({params}: {params: {token: string}}) {
         event.preventDefault();
         if (!review.available || isPaying) return;
         const items: CartItem[] = review.items.map(item => ({id:item.productId,name:item.name,quantity:item.quantity,price:item.unitPrice,image:''}));
-        const result = await runCheckout(items, null, review.customer);
+        const result = await runCheckout(items, review.customer);
         if (result) setSuccess(result.orderNumber);
       }}>
         <section className="bg-[#FEFDF9] border border-black/10 rounded-2xl p-6 mb-6">

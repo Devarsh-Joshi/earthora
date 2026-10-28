@@ -1,105 +1,56 @@
-import { ArrowUpRight } from "lucide-react";
-import { Link } from "wouter";
-import terraHeroBg from "@assets/generated_images/terra_hero_bg.webp";
-import morilifeHeroProduct from "@assets/generated_images/morilife_hero_product.webp";
-
-const BG_IMAGE_URL = terraHeroBg;
-const PRODUCT_BOTTLE_URL = morilifeHeroProduct;
+import threeProductHero from "@assets/generated_images/earthora_hero_three_products.png";
 
 export function Hero() {
   return (
-    <div
-      className="min-h-screen flex flex-col relative overflow-hidden bg-cover bg-center bg-no-repeat selection:bg-white selection:text-black pt-24 sm:pt-28 lg:pt-32"
-      style={{ backgroundImage: `url("${BG_IMAGE_URL}")` }}
+    <section
+      className="earthora-hero relative flex min-h-[520px] items-start overflow-hidden bg-no-repeat pt-28 pb-[48vw] selection:bg-white selection:text-black sm:min-h-[640px] sm:pb-[40vw] xl:h-[clamp(600px,72vh,760px)] xl:min-h-0 xl:items-center xl:pt-20 xl:pb-6"
+      style={{ backgroundImage: `url("${threeProductHero}")` }}
     >
-      {/* ── Hero Content Section ── */}
-      <section className="flex-1 flex flex-col justify-center px-5 sm:px-8 lg:px-10 pt-4 sm:pt-8 pb-8 sm:pb-12 z-10">
-        <div className="max-w-[1400px]">
-          {/* Animated Headline */}
-          <h1 className="font-dm font-normal tracking-[-0.05em] text-[36px] leading-[40px] xs:text-[42px] xs:leading-[44px] sm:text-[70px] sm:leading-[68px] md:text-[95px] md:leading-[88px] lg:text-[120px] lg:leading-[105px] xl:text-[145px] xl:leading-[120px]">
-            {/* Line 1 */}
-            <div className="flex flex-wrap items-baseline gap-x-[0.2em] py-1">
-              <span className="overflow-hidden inline-block animate-word-reveal delay-300 py-1">
-                <span className="inline-block text-white pr-1">The</span>
-              </span>
-              <span className="overflow-hidden inline-block animate-word-reveal delay-400 py-1">
-                <span className="inline-block text-white pr-1">Power</span>
-              </span>
-              <span className="overflow-hidden inline-block animate-word-reveal delay-500 py-1">
-                <span className="inline-block text-white/50 pr-1">of</span>
-              </span>
-            </div>
+      <div aria-hidden className="earthora-hero-scrim pointer-events-none absolute inset-0" />
 
-            {/* Line 2 */}
-            <div className="flex flex-wrap items-baseline gap-x-[0.2em] py-1">
-              <span className="overflow-hidden inline-block animate-word-reveal delay-600 py-1">
-                <span className="inline-block text-white/50 pr-1">Nature</span>
-              </span>
-              <span className="overflow-hidden inline-block animate-word-reveal delay-700 py-1">
-                <span className="inline-block text-white/50 pr-1">in</span>
-              </span>
-              <span className="overflow-hidden inline-block animate-word-reveal delay-800 py-1">
-                <span className="inline-block text-white pr-1">Every</span>
-              </span>
-            </div>
+      <div
+        className="relative z-10 mx-auto w-full"
+        style={{ maxWidth: 1500, padding: "0 clamp(20px, 4vw, 56px)" }}
+      >
+        <h1
+          className="max-w-[620px] font-dm font-normal text-white"
+          style={{
+            fontSize: "clamp(32px, 6vw, 100px)",
+            lineHeight: 0.94,
+            letterSpacing: "-0.045em",
+          }}
+        >
+          <span className="flex flex-wrap items-baseline" style={{ gap: "0.2em", padding: "2px 0" }}>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-300">
+              <span className="inline-block text-white">The</span>
+            </span>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-400">
+              <span className="inline-block text-white">Power</span>
+            </span>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-500">
+              <span className="inline-block text-white/50">of</span>
+            </span>
+          </span>
 
-            {/* Line 3 */}
-            <div className="flex items-center gap-x-[0.2em] flex-wrap py-1">
-              <span className="overflow-hidden inline-block animate-word-reveal delay-900 py-1">
-                <span className="inline-block text-white pr-1">Tablet</span>
-              </span>
-            </div>
-          </h1>
+          <span className="flex flex-wrap items-baseline" style={{ gap: "0.2em", padding: "2px 0" }}>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-600">
+              <span className="inline-block text-white/50">Nature</span>
+            </span>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-700">
+              <span className="inline-block text-white/50">in</span>
+            </span>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-800">
+              <span className="inline-block text-white">Every</span>
+            </span>
+          </span>
 
-          {/* CTA Section */}
-          <div className="mt-6 sm:mt-10 lg:mt-[60px] flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 lg:gap-[50px] animate-fade-up delay-600">
-            <a
-              href="#products"
-              className="bg-black text-white rounded-md w-full sm:w-[240px] md:w-[280px] lg:w-[310px] h-12 sm:h-16 lg:h-[72px] font-inter font-medium text-sm sm:text-lg lg:text-2xl tracking-[-0.03em] flex items-center justify-center gap-2 hover:bg-black/90 transition-all duration-300 shadow-xl group shrink-0"
-            >
-              <span>Explore Now</span>
-              <ArrowUpRight
-                size={20}
-                className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
-              />
-            </a>
-            <p className="text-white/90 max-w-[310px] font-inter font-normal text-xs sm:text-base lg:text-lg leading-[1.45] tracking-[-0.02em]">
-              Discover our new plant-based supplements for daily balance and
-              clean energy.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Mobile/Tablet Oversized Bleeding Product Image (visible below lg) ── */}
-      <div className="block lg:hidden relative z-0 animate-scale-in delay-800 mt-4 sm:mt-8 px-4 flex justify-end">
-        <img
-          src={PRODUCT_BOTTLE_URL}
-          alt="Earthora Farms Moringa Product"
-          width="1200"
-          height="1294"
-          fetchPriority="high"
-          decoding="async"
-          className="w-[85%] max-w-[340px] sm:max-w-[480px] object-contain drop-shadow-2xl translate-x-4"
-        />
+          <span className="flex flex-wrap items-center" style={{ gap: "0.2em", padding: "2px 0" }}>
+            <span className="overflow-hidden inline-block animate-word-reveal delay-900">
+              <span className="inline-block text-white">Tablet</span>
+            </span>
+          </span>
+        </h1>
       </div>
-
-      {/* ── Desktop Floating Product Image (lg+ absolute) ── */}
-      <img
-        src={PRODUCT_BOTTLE_URL}
-        alt="Earthora Farms Moringa Product"
-        width="1200"
-        height="1294"
-        fetchPriority="high"
-        decoding="async"
-        className="hidden lg:block absolute z-0 animate-scale-in delay-700 pointer-events-none drop-shadow-2xl"
-        style={{
-          width: "clamp(500px, 60vw, 1100px)",
-          height: "auto",
-          bottom: "-22%",
-          right: "clamp(-200px, -10vw, 0px)",
-        }}
-      />
-    </div>
+    </section>
   );
 }

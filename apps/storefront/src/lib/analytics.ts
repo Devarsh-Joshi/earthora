@@ -38,7 +38,7 @@ const INTERNAL_ROUTE_PREFIXES = ['/sun-earthora', '/developer', '/kacc'];
 export async function trackPageView(pageName: string) {
   if (INTERNAL_ROUTE_PREFIXES.some((prefix) => pageName.startsWith(prefix))) return;
   // Checkout paths contain a short-lived possession capability. Never retain it in analytics.
-  if (/^\/(?:ai-checkout|voice-checkout)\//.test(pageName)) pageName = '/checkout-review';
+  if (/^\/ai-checkout\//.test(pageName)) pageName = '/checkout-review';
   if (sessionStorage.getItem('earthora_session_tracked')) return;
   sessionStorage.setItem('earthora_session_tracked', '1');
 

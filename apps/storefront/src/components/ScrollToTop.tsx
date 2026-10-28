@@ -38,8 +38,8 @@ export default function ScrollToTop() {
         frame = window.requestAnimationFrame(() => {
           if (window.location.pathname !== pathname || window.location.hash.slice(1) !== hash) return;
           const target = document.getElementById(anchor);
-          const pages = Array.from(document.querySelectorAll<HTMLElement>('[data-earthora-voice-page]'));
-          const page = pages.find(element => element.dataset.earthoraVoicePage === pathname);
+          const pages = Array.from(document.querySelectorAll<HTMLElement>('[data-earthora-page]'));
+          const page = pages.find(element => element.dataset.earthoraPage === pathname);
           if (!target || !target.getClientRects().length || (pages.length > 0 && (!page || !page.contains(target)))) return;
           target.style.scrollMarginTop = '96px';
           target.scrollIntoView({

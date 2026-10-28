@@ -17,7 +17,7 @@ export function escapeHtml(s: unknown): string {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
 }
 
-/** Exact provider payload, shared with the Studio immutable-payload fingerprint. */
+/** Exact provider payload sent to the email provider. */
 export function emailPayload(input: SendEmailInput): Record<string, unknown> {
   return {
     from: config.RESEND_FROM_EMAIL,

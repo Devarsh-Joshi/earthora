@@ -5,7 +5,6 @@ import multipart from '@fastify/multipart';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import fastifyStatic from '@fastify/static';
-import websocket from '@fastify/websocket';
 import { resolve } from 'node:path';
 import { config, isProd } from './config.js';
 import { sql } from './db/client.js';
@@ -30,7 +29,6 @@ export async function buildServer(): Promise<FastifyInstance> {
   await app.register(sensible);
   await app.register(rateLimit, { global: true, max: 300, timeWindow: '1 minute', allowList: (req) => req.url.startsWith('/media/') });
   await app.register(multipart, { limits: { fileSize: 25 * 1024 * 1024, files: 1 } });
-  await app.register(websocket, { options: { maxPayload: 1024 * 1024 } });
   await app.register(fastifyStatic, { root: resolve(config.ASSETS_DIR), prefix: '/media/', decorateReply: false, cacheControl: true, maxAge: '7d', index: false });
   await app.register(authPlugin);
 
@@ -56,12 +54,6 @@ export async function buildServer(): Promise<FastifyInstance> {
   const widgetPath = resolve(new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), '..', 'public', 'widget.js');
   app.get('/widget.js', async (_req, reply) => {
     const js = await readFile(widgetPath, 'utf8').catch(() => readFile(resolve('public/widget.js'), 'utf8'));
-    reply.header('Content-Type', 'application/javascript').header('Cache-Control', 'public, max-age=300');
-    return reply.send(js);
-  });
-  const voiceClientPath = resolve(new URL('.', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'), '..', 'public', 'voice-client.js');
-  app.get('/voice-client.js', async (_req, reply) => {
-    const js = await readFile(voiceClientPath, 'utf8').catch(() => readFile(resolve('public/voice-client.js'), 'utf8'));
     reply.header('Content-Type', 'application/javascript').header('Cache-Control', 'public, max-age=300');
     return reply.send(js);
   });

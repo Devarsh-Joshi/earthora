@@ -116,14 +116,24 @@ export function Footer() {
               <ul className="space-y-3">
                 {products.map((product) => (
                   <li key={product.id}>
-                    <a
-                      href={`/?open=${product.id}#products`}
+                    <Link
+                      href={`/product/${product.id}`}
                       className="font-inter text-sm text-white/50 hover:text-white transition-colors tracking-[-0.01em]"
                     >
                       {shortenName(product.name)}
-                    </a>
+                    </Link>
                   </li>
                 ))}
+                {products.length > 0 && (
+                  <li>
+                    <Link
+                      href="/#products"
+                      className="font-inter text-sm font-medium text-white/70 hover:text-white transition-colors tracking-[-0.01em] inline-flex items-center gap-1"
+                    >
+                      View all →
+                    </Link>
+                  </li>
+                )}
                 {products.length === 0 && (
                   <li>
                     <Link

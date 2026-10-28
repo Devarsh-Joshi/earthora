@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import {
-  LayoutDashboard, Package, ShoppingCart, TrendingUp, Tag, LogOut, Leaf, ChevronRight,
-  Inbox, Menu, X, Sparkles, Gift, Settings, AlertTriangle, PackageOpen, Phone, RefreshCw, MessageCircleQuestion
+  LayoutDashboard, Package, ShoppingCart, TrendingUp, LogOut, Leaf, ChevronRight,
+  Inbox, Menu, X, Sparkles, Settings, AlertTriangle, PackageOpen, Phone, RefreshCw, MessageCircleQuestion
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
@@ -12,9 +12,7 @@ const navItems = [
   { id: "dashboard",  label: "Dashboard",     icon: LayoutDashboard, path: "/sun-earthora/dashboard", hint: "Overview & key metrics" },
   { id: "products",   label: "Products",       icon: Package,         path: "/sun-earthora/products", hint: "Manage inventory & listings" },
   { id: "orders",     label: "Orders",         icon: ShoppingCart,    path: "/sun-earthora/orders", hint: "View & fulfill customer orders" },
-  { id: "coupons",    label: "Coupons",        icon: Tag,             path: "/sun-earthora/coupons", hint: "Create promotional discounts" },
-  { id: "festive",    label: "Festive Deals",  icon: Gift,        path: "/sun-earthora/festive", hint: "Seasonal campaigns & banners" },
-  { id: "voice-knowledge", label: "Agent Knowledge", icon: MessageCircleQuestion, path: "/sun-earthora/voice-knowledge", hint: "Approved product answers for WhatsApp and voice" },
+  { id: "assistant-knowledge", label: "Agent Knowledge", icon: MessageCircleQuestion, path: "/sun-earthora/assistant-knowledge", hint: "Approved product answers for the chat assistant" },
   { id: "analytics", label: "Analytics",      icon: TrendingUp,      path: "/sun-earthora/analytics", hint: "Revenue & traffic trends" },
   { id: "settings",  label: "Settings",       icon: Settings,        path: "/sun-earthora/settings", hint: "Admin configuration" },
 ];

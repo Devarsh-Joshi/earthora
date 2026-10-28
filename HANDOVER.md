@@ -7,33 +7,13 @@
 
 ---
 
-## Voice deployment update — 20 September 2026
+## Voice and WhatsApp agents removed — 28 October 2026
 
-Web microphone and Tata phone voice now use the MSH/Sun Pathology-derived
-LiveKit service under `livekit-voice/`. On the Earthora VPS, read
-`/opt/earthora/SUNPATH_VOICE_ACTIVE` for its current immutable release.
-GPU inference uses Whisper/IndicConformer,
-Indic Parler (Neha across English, Hindi/Hinglish and Gujarati), and Qwen 3.5 9B.
-Existing storefront/chat appearance and typed-chat behavior are preserved.
-
-Tata endpoint 2163 now uses
-`wss://earthora.srv1915512.hstgr.cloud/ws/voice/smartflo`.
-The legacy `voice-service/` container is retained for rollback; it is not the
-active web/phone media path. The current API build context is
-`/opt/earthora/releases/knowledge-api-625dc2a12bc8`.
-
-Read [the SunPath deployment handoff](livekit-voice/SUNPATH-DEPLOYMENT.md) and
-[runtime guide](livekit-voice/README.md) before deploying voice changes.
-These supersede older voice/Render instructions below. Public synthetic tests
-passed; a real handset call has not yet been tested. Runtime secrets stay on
-the VPS and outside Git.
-
-The September 20 follow-up verifies the nine approved tablet knowledge records
-against the legacy bot's configured source; current Postgres records match.
-The voice context now preserves complete records and provenance before prompt
-budgeting. The same Neha voice uses a pitch-preserving 1.20× tempo on web and
-phone. See [the conversation, knowledge and audio verification](livekit-voice/verification/sunpath/20260920-naturalness-and-knowledge.md)
-for measured latency and the remaining completed-phrase synthesis limitation.
+The web/phone voice agent (`livekit-voice/`, `voice-service/`) and the WhatsApp
+agent (`whatsapp-chatbot/`) were removed from the codebase. The website chat
+assistant in `apps/api/src/platform` is the only AI channel. Running VPS
+containers, Tata/Smartflo endpoints and Supabase edge functions deployed from the
+old code are not shut down by a code change; retire them on the server.
 
 ---
 
@@ -41,8 +21,8 @@ for measured latency and the remaining completed-phrase synthesis limitation.
 
 Two products in one monorepo:
 1. **Storefront** — the public Earthora Farms shop (single-origin organic Moringa). React 19 + Vite + Tailwind.
-2. **AI platform** — a scenario-workflow RAG assistant across Chat / Voice / WhatsApp / Calls, with an admin
-   console. Fastify API + self-hosted PostgreSQL 17 + pgvector, OpenAI today (Google/Gemini + Chirp behind adapters).
+2. **AI platform** — a scenario-workflow RAG website chat assistant, with an admin
+   console. Fastify API + self-hosted PostgreSQL 17 + pgvector, OpenAI today (Google/Gemini behind adapters).
 
 The whole thing was migrated **off Supabase + Netlify + Render** onto one owned stack on a Hostinger VPS.
 Background/decision history: `output/earthora-ai-platform-master-plan.md`, `C:\Earthora\migration\progress.md` (in the bundle).
@@ -61,21 +41,18 @@ cut over yet — see §12.
 ## 1. Repository & branches — read this first
 
 - Repo: **`github.com/earthorafarms-spec/Earthorafarms`** — **PUBLIC. Never commit a secret.** (`.env`, `apps/api/.env`,
-  `.env.infra`, `voice-service/.env` are all gitignored; keep it that way.)
+  `.env.infra` are all gitignored; keep it that way.)
 - **`main` is the single authoritative branch.** It contains the full AI platform (`apps/api`, `apps/console`,
   `apps/storefront`) **and** the team's ongoing storefront work. Base all new work on `main`.
 - Monorepo: npm workspaces, `apps/*`. Node **>= 22** (no `.nvmrc`; use Node 22.x for reproducibility).
-- Two contributors (Devarsh Joshi, "GithubforAdarsh") also commit to `main` — mostly the **legacy** `voice-service/` +
-  `whatsapp-chatbot/` (the old Render bots) and storefront tweaks. Coordinate; pull before you push.
+- Two contributors (Devarsh Joshi, "GithubforAdarsh") also commit to `main`, mostly storefront work.
+  Coordinate; pull before you push.
 - The old `platform/*` branches have been removed — everything in them is already in `main`.
-- A git submodule `earthora-messaging-platform` (same org, separate repo) is referenced in `.gitmodules` but is a
-  **legacy Python service, not part of the new platform** — you can ignore it; `git submodule update --init` needs
-  separate repo access and is not required to build or run anything here.
 
 **New vs legacy code on `main`** (both currently coexist):
 | Authoritative (the new platform) | Legacy (old stack, being retired — §12) |
 |---|---|
-| `apps/api`, `apps/console`, `apps/storefront`, `infra/vps` | `voice-service/`, `whatsapp-chatbot/`, `netlify/`, `supabase/`, `render.yaml`, `output/`, `tmp/`, `z.md` |
+| `apps/api`, `apps/console`, `apps/storefront`, `infra/vps` | `netlify/`, `supabase/`, `output/`, `tmp/`, `z.md` |
 
 ---
 
@@ -152,7 +129,7 @@ cd Earthorafarms && npm install          # Node >= 22
 # restore env files from the credentials bundle:
 #   env/master.env.infra      -> .env.infra
 #   env/api.local.env         -> apps/api/.env
-#   env/storefront-netlify.env-> .env         (legacy; only if touching old netlify/voice code)
+#   env/storefront-netlify.env-> .env         (legacy; only if touching old netlify code)
 # The api.local.env points DATABASE_URL at the VPS DB through an SSH tunnel:
 ssh -i earthora_kvm -L 5433:127.0.0.1:5433 root@187.52.121.146   # keep open
 npm run dev:api      # http://localhost:4100
@@ -174,7 +151,6 @@ The storefront/console are static builds; some values are **baked in at build ti
   - `VITE_API_URL=` **empty on purpose** → the storefront calls **same-origin `/api`** (nginx serves the store and
     proxies `/api` to the API on the same host). Leave empty for the current same-origin deploy. Only set it if you
     ever host the storefront on a *different* origin than the API.
-  - `VITE_VOICE_SERVICE_URL=` empty → the old Render voice-order form is unused by the new platform.
 - The **console** calls same-origin `/api` too (its nginx vhost proxies `/api`), so it needs no build-time API URL.
 - Consequence: after DNS cutover (§12) to `earthorafarms.com`, no storefront rebuild is needed for the API URL
   (still same-origin); you only change nginx `server_name`, the API's `PUBLIC_*_URL` / `CORS_ORIGINS`, and reissue TLS.
@@ -273,7 +249,7 @@ registrar · dashboard logins for Razorpay, Cloudflare/R2, Resend, OpenAI, Googl
 - **No CI/CD**, images only `:latest` — see §7 improvements.
 - **Public repo hygiene:** `supabase/.temp/` exposes the (old) Supabase project ref/name — untrack it. Two
   secret-*shaped* placeholders in `apps/storefront/src/pages/developer/dashboard.tsx` are mock display values
-  (`sk_live_chat_…`, `va_live_voice_…`) — confirm before relying on them being harmless.
+  (`sk_live_chat_…`) — confirm before relying on it being harmless.
 
 ---
 
@@ -287,15 +263,13 @@ registrar · dashboard logins for Razorpay, Cloudflare/R2, Resend, OpenAI, Googl
    have the owner change DNS). Then: add nginx `server_name`s, reissue the TLS cert (certbot), update the API's
    `PUBLIC_*_URL` + `CORS_ORIGINS`, and force-recreate the API. No storefront rebuild needed (same-origin, §6).
 3. **Enable Google/Gemini.** The Google project is billing-blocked (health shows `google_cloud:false`). Add a
-   service-account JSON on an enabled project to switch providers per-channel and turn on Chirp voice.
-4. **WhatsApp / Calls live trials.** Tata Omni is wired — point the number's webhook to
-   `https://earthora.srv1915512.hstgr.cloud/webhooks/whatsapp`. Smartflo calls need the DID repointed.
+   service-account JSON on an enabled project to switch providers per-channel.
 5. **Go-live data.** The single active product is test data (`slug='cheese'`, price ₹1 vs mrp ₹999) — fix before
    launch. **Product images still point at Supabase storage** (`cewnocilnkbvxwdkrvyn.supabase.co`) — migrate image
    hosting to R2/owned storage **before** deleting the Supabase project.
-6. **Retire the old stack** (Render `voice-service` + `whatsapp-chatbot`, Netlify, Supabase) only **after** the
-   channel live-trials pass and image hosting is migrated. Safe order: repoint channels → verify → drop Render/Netlify
-   → migrate images off Supabase → drop Supabase last.
+6. **Retire the old stack** (Render voice/WhatsApp services, the VPS `earthora-voice` container, Netlify, Supabase)
+   once image hosting is migrated. Safe order: stop voice/WhatsApp services → drop Render/Netlify → migrate images
+   off Supabase → drop Supabase last.
 
 ---
 

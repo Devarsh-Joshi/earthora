@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Activity, CheckCircle, AlertCircle, RefreshCw, Key, Power, Database, Sparkles, MessageSquare, PhoneCall
+  Activity, CheckCircle, AlertCircle, RefreshCw, Key, Power, Database, Sparkles, MessageSquare
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +24,6 @@ export default function DeveloperDashboard() {
     { keyName: "Resend Admin (Primary)", dbKey: "RESEND_API_KEY_ADMIN", keyValue: "", health: "checking", latency: null, remainingTokens: 2840, totalTokens: 3000, unit: "emails/mo", lastTested: "Never" },
     { keyName: "Resend Key Account (Backup)", dbKey: "RESEND_API_KEY_KACC", keyValue: "", health: "checking", latency: null, remainingTokens: 2980, totalTokens: 3000, unit: "emails/mo", lastTested: "Never" },
     { keyName: "AI Chatbot API Key", dbKey: "AI_CHATBOT_API_KEY", keyValue: "", health: "checking", latency: null, remainingTokens: 84500, totalTokens: 100000, unit: "tokens", lastTested: "Never" },
-    { keyName: "Voice Agent API Key", dbKey: "AI_VOICE_API_KEY", keyValue: "", health: "checking", latency: null, remainingTokens: 42000, totalTokens: 50000, unit: "tokens", lastTested: "Never" },
   ]);
   const [activeResendKey, setActiveResendKey] = useState("RESEND_API_KEY_ADMIN");
   const { toast } = useToast();
@@ -54,7 +53,6 @@ export default function DeveloperDashboard() {
             if (k.dbKey === "RESEND_API_KEY_ADMIN") rawValue = defaultAdminResend;
             if (k.dbKey === "RESEND_API_KEY_KACC") rawValue = defaultKaccResend;
             if (k.dbKey === "AI_CHATBOT_API_KEY") rawValue = "sk_live_chat_7a8b9c0d1e2f";
-            if (k.dbKey === "AI_VOICE_API_KEY") rawValue = "va_live_voice_3f2e1d0c9b8a";
           }
           const isHealthy = Boolean(rawValue);
           return {
@@ -209,8 +207,6 @@ export default function DeveloperDashboard() {
                   <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center">
                     {key.dbKey.includes("AI_CHAT") ? (
                       <MessageSquare className="w-5 h-5 text-indigo-400" />
-                    ) : key.dbKey.includes("AI_VOICE") ? (
-                      <PhoneCall className="w-5 h-5 text-indigo-400" />
                     ) : (
                       <Key className="w-5 h-5 text-indigo-400" />
                     )}

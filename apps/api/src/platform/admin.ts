@@ -186,7 +186,7 @@ export async function platformAdminRoutes(app: FastifyInstance): Promise<void> {
   });
 
   // ── Channels ───────────────────────────────────────────────────────────────
-  app.get('/platform/channels', staff, async () => ({ channels: await sql`SELECT id, type, slug, name, public_key, enabled, version, published_at, draft_config, published_config FROM channels WHERE tenant_id = ${await tenantId()} ORDER BY type` }));
+  app.get('/platform/channels', staff, async () => ({ channels: await sql`SELECT id, type, slug, name, public_key, enabled, version, published_at, draft_config, published_config FROM channels WHERE tenant_id = ${await tenantId()} AND type = 'chat' ORDER BY type` }));
   app.patch('/platform/channels/:id', staff, async (req) => {
     const b = z.object({ name: z.string().optional(), enabled: z.boolean().optional(), draft_config: z.record(z.unknown()).optional() }).parse(req.body);
     const id = (req.params as any).id;

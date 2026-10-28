@@ -51,28 +51,6 @@ const schema = z.object({
   OPENAI_API_KEY: z.string().default(''),
   OPENAI_MODEL: z.string().default('gpt-4o-mini'),
   GEMINI_API_KEY: z.string().default(''),
-  GOOGLE_APPLICATION_CREDENTIALS_JSON: z.string().default(''),
-  GOOGLE_CLOUD_PROJECT_ID: z.string().default(''),
-  SARVAM_API_KEY: z.string().default(''),
-
-  // Earthora's private LiveKit control plane and self-hosted voice reasoning.
-  // These settings do not change the storefront chat or its embedding model.
-  VOICE_CONTROL_URL: z.union([z.string().url(), z.literal('')]).default(''),
-  EARTHORA_VOICE_INTERNAL_KEY: z.string().default(''),
-  VOICE_PHONE_CHANNEL_KEY: z.string().default(''),
-  AI_BASE_URL: z.union([z.string().url(), z.literal('')]).default(''),
-  AI_API_KEY: z.string().default(''),
-  AI_LLM_MODEL: z.string().default('gemma4:12b-qat'),
-
-  WHATSAPP_PROVIDER: z.enum(['meta', 'tata_omni', 'none']).default('none'),
-  TATA_OMNI_API_BASE_URL: z.string().default('https://wb.omni.tatatelebusiness.com'),
-  TATA_OMNI_ACCESS_TOKEN: z.string().default(''),
-  TATA_OMNI_WEBHOOK_SECRET: z.string().default(''),
-  WHATSAPP_PHONE_NUMBER_ID: z.string().default(''),
-  WHATSAPP_TOKEN: z.string().default(''),
-  WHATSAPP_VERIFY_TOKEN: z.string().default(''),
-  WHATSAPP_APP_SECRET: z.string().default(''),
-  SMARTFLO_ENDPOINT_TOKEN: z.string().default(''),
 });
 
 export type AppConfig = z.infer<typeof schema>;

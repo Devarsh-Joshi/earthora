@@ -31,12 +31,6 @@ yarn-error.log*
 
 # Environment files (contain live secrets — never commit)
 .env
-voice-service/.env
-
-# Voice service build output
-voice-service/dist
-voice-service/dist-whatsapp
-voice-service/node_modules
 
 scrub_secrets.ps1
 
@@ -44,13 +38,6 @@ scrub_secrets.ps1
 apps/*/.env
 .env.infra
 
-# Self-hosted AI server credentials, written by the Plymaxx credential helper
-.env.plymaxx.local
-**/.env.plymaxx.local
 
-# LiveKit deployment credentials and local Python caches
-livekit-voice/livekit/livekit.yml
-livekit-voice/**/__pycache__/
-livekit-voice/**/.pytest_cache/
-livekit-voice/**/pytest-cache-files-*/
-livekit-voice/ROLLBACK_PATH
+# Supabase CLI link state (project ref, pooler URL)
+supabase/.temp/

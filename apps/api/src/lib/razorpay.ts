@@ -25,11 +25,11 @@ async function rz<T>(method: 'GET' | 'POST', path: string, body?: unknown): Prom
 }
 
 export interface RazorpayLineItem {
-  sku: string; variant_id: string; price: number; offer_price: number; tax_amount: number; quantity: number;
-  name: string; description: string; weight: number; dimensions: Record<string, never>; image_url: string; product_url: string; notes: Record<string, never>;
+  sku: string; variant_id: string; price: number; offer_price: number; quantity: number;
+  name: string; description: string; image_url?: string; product_url?: string;
 }
 
-export interface RazorpayOrder { id: string; amount: number; currency: string; receipt?: string; status: string; notes?: Record<string, string> }
+export interface RazorpayOrder { id: string; amount: number; amount_paid: number; currency: string; receipt?: string; status: string; notes?: Record<string, string> }
 
 export function createOrder(input: { amountPaise: number; currency: string; receipt: string; lineItems: RazorpayLineItem[]; notes?: Record<string, string> }): Promise<RazorpayOrder> {
   return rz<RazorpayOrder>('POST', '/orders', {

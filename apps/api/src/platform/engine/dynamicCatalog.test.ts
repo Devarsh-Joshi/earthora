@@ -21,7 +21,7 @@ const context = (channelType: string): FunctionContext => ({
 beforeEach(() => vi.resetAllMocks());
 
 describe('published product data refresh without code or model changes', () => {
-  it.each(['chat', 'voice', 'calls'])('updates catalogue, detail and price in the same %s conversation', async channel => {
+  it.each(['chat'])('updates catalogue, detail and price in the same %s conversation', async channel => {
     const rows = [product('tablets', 'Synthetic Leaf Tablets'), product('new-tea', 'Synthetic Herbal Tea', 'archived'),
       product('draft', 'Unpublished Draft', 'draft'), product('old', 'Archived Product', 'archived')];
     vi.mocked(listProducts).mockImplementation(async () => rows as any);

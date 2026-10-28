@@ -8,11 +8,11 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Gate } from '@/components/Gate';
 import ScrollToTop from '@/components/ScrollToTop';
 import { AssistantWidget } from '@/components/AssistantWidget';
-import { VoiceNavigationBridge, withVoicePage } from '@/components/VoiceNavigationBridge';
+import { StorefrontNavigationBridge, withStorefrontPage } from '@/components/StorefrontNavigationBridge';
 import { ChatNavigationBridge } from '@/components/ChatNavigationBridge';
-import { VoiceStorefrontActions } from '@/components/VoiceStorefrontActions';
 import { CatalogFreshnessBridge } from '@/components/CatalogFreshnessBridge';
 import { PageSkeleton } from '@/components/ui/PageSkeleton';
+import { SeoManager } from '@/seo/SeoManager';
 // Home is eager — it's the LCP page for most visitors
 import Home from './pages/home';
 import { KaccGate } from '@/components/KaccGate';
@@ -43,22 +43,21 @@ function lazyWithRetry<T extends React.ComponentType<any>>(
   });
 }
 
-const PublicHome = withVoicePage(Home);
+const PublicHome = withStorefrontPage(Home);
 
 // Public routes — lazy-loaded to keep the initial bundle small
-const OurStory       = withVoicePage(lazyWithRetry(() => import('./pages/our-story')));
-const Contact        = withVoicePage(lazyWithRetry(() => import('./pages/contact')));
-const HealthBenefits = withVoicePage(lazyWithRetry(() => import('./pages/health-benefits')));
-const ProductDetail  = withVoicePage(lazyWithRetry(() => import('./pages/product-detail')));
-const Cart           = withVoicePage(lazyWithRetry(() => import('./pages/cart')));
+const OurStory       = withStorefrontPage(lazyWithRetry(() => import('./pages/our-story')));
+const Contact        = withStorefrontPage(lazyWithRetry(() => import('./pages/contact')));
+const HealthBenefits = withStorefrontPage(lazyWithRetry(() => import('./pages/health-benefits')));
+const ProductDetail  = withStorefrontPage(lazyWithRetry(() => import('./pages/product-detail')));
+const Cart           = withStorefrontPage(lazyWithRetry(() => import('./pages/cart')));
 const Favorites      = lazyWithRetry(() => import('./pages/favorites'));
-const VoiceCheckout  = lazyWithRetry(() => import('./pages/voice-checkout'));
 const AiCheckout = lazyWithRetry(() => import('./pages/ai-checkout'));
 const ReviewOrder    = lazyWithRetry(() => import('./pages/review-order'));
-const ShippingPolicy = withVoicePage(lazyWithRetry(() => import('./pages/shipping-policy')));
-const FAQ            = withVoicePage(lazyWithRetry(() => import('./pages/faq')));
-const PrivacyPolicy  = withVoicePage(lazyWithRetry(() => import('./pages/privacy-policy')));
-const TermsOfUse     = withVoicePage(lazyWithRetry(() => import('./pages/terms-of-use')));
+const ShippingPolicy = withStorefrontPage(lazyWithRetry(() => import('./pages/shipping-policy')));
+const FAQ            = withStorefrontPage(lazyWithRetry(() => import('./pages/faq')));
+const PrivacyPolicy  = withStorefrontPage(lazyWithRetry(() => import('./pages/privacy-policy')));
+const TermsOfUse     = withStorefrontPage(lazyWithRetry(() => import('./pages/terms-of-use')));
 const CookieSettings = lazyWithRetry(() => import('./pages/cookie-settings'));
 
 // Admin routes
@@ -67,9 +66,7 @@ const AdminDashboard      = lazyWithRetry(() => import('./pages/sun-earthora/das
 const AdminProducts       = lazyWithRetry(() => import('./pages/sun-earthora/products'));
 const AdminOrders         = lazyWithRetry(() => import('./pages/sun-earthora/orders'));
 const AdminAnalytics      = lazyWithRetry(() => import('./pages/sun-earthora/analytics'));
-const AdminCoupons        = lazyWithRetry(() => import('./pages/sun-earthora/coupons'));
-const AdminFestive        = lazyWithRetry(() => import('./pages/sun-earthora/festive'));
-const AdminVoiceKnowledge = lazyWithRetry(() => import('./pages/sun-earthora/voice-knowledge'));
+const AdminAssistantKnowledge = lazyWithRetry(() => import('./pages/sun-earthora/assistant-knowledge'));
 const AdminSettings       = lazyWithRetry(() => import('./pages/sun-earthora/settings'));
 const DeveloperLayout     = lazyWithRetry(() => import('./pages/developer/layout'));
 const DeveloperDashboard  = lazyWithRetry(() => import('./pages/developer/dashboard'));
@@ -114,11 +111,11 @@ export default function App() {
           <CartProvider>
             <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
               <PageTracker />
+              <SeoManager />
               <ScrollToTop />
               <AssistantWidget />
-              <VoiceNavigationBridge />
+              <StorefrontNavigationBridge />
               <ChatNavigationBridge />
-              <VoiceStorefrontActions />
               <Suspense fallback={<PageLoader />}>
                 <Switch>
                   <Route path="/" component={PublicHome} />
@@ -134,7 +131,6 @@ export default function App() {
                   <Route path="/checkout">
                     <Redirect to="/cart" />
                   </Route>
-                  <Route path="/voice-checkout/:token" component={VoiceCheckout} />
                   <Route path="/ai-checkout/:token" component={AiCheckout} />
                   <Route path="/review-order" component={ReviewOrder} />
                   <Route path="/shipping-policy" component={ShippingPolicy} />
@@ -164,9 +160,7 @@ export default function App() {
                           <Route path="/sun-earthora/dashboard" component={AdminDashboard} />
                           <Route path="/sun-earthora/products" component={AdminProducts} />
                           <Route path="/sun-earthora/orders" component={AdminOrders} />
-                          <Route path="/sun-earthora/coupons" component={AdminCoupons} />
-                          <Route path="/sun-earthora/festive" component={AdminFestive} />
-                          <Route path="/sun-earthora/voice-knowledge" component={AdminVoiceKnowledge} />
+                          <Route path="/sun-earthora/assistant-knowledge" component={AdminAssistantKnowledge} />
                           <Route path="/sun-earthora/analytics" component={AdminAnalytics} />
                           <Route path="/sun-earthora/settings" component={AdminSettings} />
                           <Route>

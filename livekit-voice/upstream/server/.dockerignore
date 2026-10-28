@@ -1,9 +1,0 @@
-# Keep secrets + runtime junk out of the image build context.
-# google/ and .env are provided at runtime by compose (bind mount / env_file).
-google/
-.env
-__pycache__/
-*.pyc
-*.bak*
-compose.yml*
-.dockerignore

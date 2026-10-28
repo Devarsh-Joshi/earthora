@@ -84,11 +84,9 @@ export async function handler(event) {
   }
 
   let orderId = "";
-  let pdfOnly = false;
   try {
     const body = JSON.parse(event.body || "{}");
     orderId = body.orderId || body.id || "";
-    pdfOnly = body.mode === "pdf";
   } catch {
     return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "Invalid JSON payload" }) };
   }
@@ -487,21 +485,6 @@ export async function handler(event) {
     const pdfBytes = await pdfDoc.save();
     const pdfBase64 = Buffer.from(pdfBytes).toString("base64");
 
-    // WhatsApp fetches the same official invoice through a signed voice-service
-    // URL. PDF-only mode must not send another email on every document fetch.
-    if (pdfOnly) {
-      return {
-        statusCode: 200,
-        headers: {
-          ...CORS_HEADERS,
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `inline; filename="Tax_Invoice_ORD-${orderId.substring(0, 8).toUpperCase()}.pdf"`,
-          "Cache-Control": "private, no-store",
-        },
-        isBase64Encoded: true,
-        body: pdfBase64,
-      };
-    }
 
     // ══════════════════════════════════════════════════════════════════════════
     // EMAIL DISPATCH VIA RESEND API OR NODEMAILER SMTP OR SUPABASE EDGE

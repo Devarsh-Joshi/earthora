@@ -77,13 +77,7 @@ export async function handler(event) {
       return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: 'No active products found in cart.' }) };
     }
 
-    // 2. Fetch active festive deals (still honored — non-coupon, catalog-wide)
-    const now = new Date().toISOString();
-    const deals = await sbGet(
-      `festival_details?festival_status=eq.active&festival_start_date=lte.${now}&festival_end_date=gte.${now}&select=discount_type,discount_value,festival_deal_products(product_id)`
-    ).catch(() => []);
-
-    // 3. Compute server-side subtotal + build line_items for Magic Checkout
+    // 2. Compute server-side subtotal + build line_items for Magic Checkout
     const productMap = new Map();
     for (const p of products) {
       productMap.set(p.id,   p);
@@ -97,20 +91,7 @@ export async function handler(event) {
       const prod = productMap.get(pid);
       if (!prod) continue;
 
-      let unitPrice = Number(prod.price);
-
-      for (const deal of (deals || [])) {
-        const inDeal = (deal.festival_deal_products || []).some(
-          dp => dp.product_id === prod.id || dp.product_id === prod.slug
-        );
-        if (inDeal) {
-          const val = Number(deal.discount_value);
-          unitPrice = deal.discount_type === 'percentage'
-            ? Math.round(unitPrice - (unitPrice * val) / 100)
-            : Math.max(0, Math.round(unitPrice - val));
-          break;
-        }
-      }
+      const unitPrice = Number(prod.price);
 
       const qty = Math.max(1, Math.round(Number(item.quantity) || 1));
       const unitPaise = Math.round(unitPrice * 100);

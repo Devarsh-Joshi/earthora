@@ -78,10 +78,7 @@ const WORKFLOWS: WorkflowSeed[] = [
 ];
 
 const CHANNELS = [
-  { type: 'chat', slug: 'earthora', name: 'Website Chat', config: { name: 'Eva', greeting: 'Hi, I\'m Eva from Earthora Farms 🌿 Ask me about our moringa products, your order, or anything else.', starters: ['Recommend a product for me', 'Benefits of moringa tablets', 'Where is my order?'], voiceEnabled: true, appearance: { primary: '#26593b', accent: '#DC9950', position: 'right' }, persona: { tone: 'Warm, natural, concise — like a knowledgeable friend.' } } },
-  { type: 'voice', slug: 'earthora', name: 'Voice Assistant', config: { name: 'Eva', greeting: 'Hi, you\'re speaking with Eva from Earthora Farms. How can I help?', voice: 'shimmer', language: 'auto', silenceTimeoutSec: 20, maxCallSec: 600 } },
-  { type: 'whatsapp', slug: 'earthora', name: 'WhatsApp', config: { provider: 'tata_omni', greeting: 'Welcome to Earthora Farms 🌿', menuEnabled: false } },
-  { type: 'calls', slug: 'earthora', name: 'Phone (Smartflo)', config: { greeting: 'Welcome to Earthora Farms.', silenceLadder: [7, 3], maxCallSec: 600 } },
+  { type: 'chat', slug: 'earthora', name: 'Website Chat', config: { name: 'Eva', greeting: 'Hi, I\'m Eva from Earthora Farms 🌿 Ask me about our moringa products, your order, or anything else.', starters: ['Recommend a product for me', 'Benefits of moringa tablets', 'Where is my order?'], appearance: { primary: '#26593b', accent: '#DC9950', position: 'right' }, persona: { tone: 'Warm, natural, concise — like a knowledgeable friend.' } } },
 ];
 
 /** Idempotently seeds functions, workflows, example utterances, channels, and kicks off KB indexing on first run. */

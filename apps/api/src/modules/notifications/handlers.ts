@@ -2,7 +2,6 @@ import { config } from '../../config.js';
 import { sql } from '../../db/client.js';
 import { signPayload } from '../../lib/crypto.js';
 import { brandedEmail, escapeHtml, sendEmail } from '../../lib/email.js';
-import { isStudioNotification, sendStudioEmail } from '../../lib/studioEmail.js';
 import { getOrderBundle } from '../commerce/orders.js';
 import { registerJobHandler, registerSchedule } from '../jobs/worker.js';
 import { enqueueJob } from '../jobs/queue.js';
@@ -45,26 +44,10 @@ export function registerNotificationJobs(): void {
 
   registerJobHandler('contact_email', async (job) => {
     const p = job.payload as Record<string, string>;
-    const studio = isStudioNotification(job.dedupe_key);
-    const responseExpectation = studio ? 'Our team will review your request.' : 'Our team will reply within one working day.';
-    const ack = brandedEmail('We received your message', `<p>Hi ${escapeHtml(p.name)}, thanks for reaching out about <b>${escapeHtml(p.topic)}</b>. ${responseExpectation}</p><blockquote style="border-left:3px solid #dce7c5;margin:12px 0;padding:6px 12px;color:#3b4a40">${escapeHtml(p.message)}</blockquote>`);
+    const ack = brandedEmail('We received your message', `<p>Hi ${escapeHtml(p.name)}, thanks for reaching out about <b>${escapeHtml(p.topic)}</b>. Our team will reply within one working day.</p><blockquote style="border-left:3px solid #dce7c5;margin:12px 0;padding:6px 12px;color:#3b4a40">${escapeHtml(p.message)}</blockquote>`);
     const notice = brandedEmail(`Contact form: ${escapeHtml(p.topic)}`, `<p><b>${escapeHtml(p.name)}</b> &lt;${escapeHtml(p.email)}&gt; ${escapeHtml(p.phone || '')}</p><p>${escapeHtml(p.message).replace(/\n/g, '<br>')}</p><p style="color:#6b7a70">Marketing consent: ${p.marketingConsent ? 'yes' : 'no'}</p>`);
     const acknowledgement = { to: p.email, kind: 'contact_ack', subject: 'We received your message — Earthora Farms', html: ack };
     const notification = { to: config.ADMIN_NOTIFY_EMAIL, kind: 'contact_notice', subject: `Contact form — ${p.topic} — ${p.name}`, html: notice, replyTo: p.email };
-    if (studio) {
-      // A rejected visitor mailbox must not prevent the team receiving the enquiry.
-      // Each part retains its own receipt, so retries skip whichever already succeeded.
-      const results = await Promise.allSettled([
-        sendStudioEmail(job.dedupe_key!, 'ack', acknowledgement),
-        sendStudioEmail(job.dedupe_key!, 'notice', notification),
-      ]);
-      const failed = results.filter((result): result is PromiseRejectedResult => result.status === 'rejected');
-      if (failed.length) {
-        const uncertain = failed.find(result => result.reason instanceof Error && (result.reason as Error & { uncertain?: boolean }).uncertain);
-        throw (uncertain || failed[0]).reason;
-      }
-      return { ack: (results[0] as PromiseFulfilledResult<string>).value, notice: (results[1] as PromiseFulfilledResult<string>).value };
-    }
     const a = await sendEmail(acknowledgement);
     const b = await sendEmail(notification);
     return { ack: a, notice: b };
@@ -77,7 +60,6 @@ export function registerNotificationJobs(): void {
     const html = brandedEmail(`Low stock: ${escapeHtml(p.productName)}`, `<p><b>${escapeHtml(p.productName)}</b> is down to <b>${p.stock}</b> units (threshold ${p.threshold}).</p><p><a href="${config.PUBLIC_STORE_URL}/sun-earthora/products">Restock in admin</a></p>`);
     const id = await sendEmail({ to, kind: 'low_stock', subject: `Low stock: ${p.productName} (${p.stock} left)`, html });
     await sql`UPDATE sms_alert_logs SET status = 'delivered', provider_message_id = ${id ?? 'email'} WHERE id = ${p.logId}`;
-    await enqueueJob('whatsapp_low_stock', { ...p }, { dedupeKey: `wa-low-stock:${p.logId}` });
     return { emailId: id };
   });
 
@@ -88,7 +70,6 @@ export function registerNotificationJobs(): void {
     const o = bundle.order;
     const html = brandedEmail(`Your order ${escapeHtml(o.order_number)} is on its way`, `<p>Hi ${escapeHtml(o.customer_name || 'there')}, your Earthora order has been shipped.</p><p><a href="${escapeHtml(p.trackingUrl)}" style="display:inline-block;background:#26593b;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none">Track shipment</a></p>`);
     const id = o.customer_email ? await sendEmail({ to: o.customer_email, kind: 'tracking', subject: `Your order ${o.order_number} has shipped`, html }) : null;
-    await enqueueJob('whatsapp_tracking', { orderId: o.id, trackingUrl: p.trackingUrl }, { dedupeKey: `wa-tracking:${o.id}:${p.trackingUrl}` });
     return { emailId: id };
   });
 

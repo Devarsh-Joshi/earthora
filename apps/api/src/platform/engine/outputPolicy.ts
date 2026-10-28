@@ -1,4 +1,4 @@
-/** Output guardrails ported in spirit from voice-service: never claim orders placed/payment taken, never ask for OTP/card. */
+/** Output guardrails: never claim orders placed/payment taken, never ask for OTP/card. */
 const FORBIDDEN = [
   { re: /\b(order (is )?placed|order confirmed|payment (is )?(successful|received|done)|paid successfully)\b/i, reason: 'claims-order-or-payment' },
   { re: /\b(cvv|card number|otp|upi pin|expiry date)\b/i, reason: 'asks-sensitive' },

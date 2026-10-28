@@ -1,9 +1,8 @@
 import { sql } from '../../db/client.js';
 import { getEmbedding, getLlm } from '../providers/index.js';
-import { inVoiceScope } from '../providers/voiceScope.js';
 
 export interface WorkflowRow { id: string; slug: string; name: string; description: string; mode: string; priority: number; definition: any; is_fallback: boolean }
-export interface RouteDecision { workflowId: string; slug: string; confidence: number; reason: string; slots: Record<string, string>; language: string; needsClarification: boolean; knowledgeQuery?: string }
+export interface RouteDecision { workflowId: string; slug: string; confidence: number; reason: string; slots: Record<string, string>; language: string; needsClarification: boolean }
 
 /** Stage A: embedding kNN over workflow_examples → top candidate workflows. */
 async function candidatesByEmbedding(tenantId: string, text: string, k = 3): Promise<{ workflowId: string; slug: string; score: number }[]> {
@@ -35,12 +34,9 @@ export async function routeTurn(input: {
   if (!workflows.length) return { workflowId: '', slug: 'general', confidence: 0, reason: 'no workflows', slots: {}, language: 'en', needsClarification: false };
   const fallback = workflows.find((w) => w.is_fallback) ?? workflows[0];
 
-  // The self-hosted voice path routes all published workflows in one Qwen call.
-  // It must not silently contact a paid embedding service.
-  const voice = inVoiceScope();
-  const cands = voice ? [] : await candidatesByEmbedding(input.tenantId, [input.activeWorkflow?.name, input.message].filter(Boolean).join(' — '));
+  const cands = await candidatesByEmbedding(input.tenantId, [input.activeWorkflow?.name, input.message].filter(Boolean).join(' — '));
   const candWorkflows = cands.map((c) => workflows.find((w) => w.id === c.workflowId)).filter(Boolean) as WorkflowRow[];
-  const pool = voice ? workflows : uniqueBy([...(input.activeWorkflow ? [input.activeWorkflow] : []), ...candWorkflows, fallback], (w) => w.id);
+  const pool = uniqueBy([...(input.activeWorkflow ? [input.activeWorkflow] : []), ...candWorkflows, fallback], (w) => w.id);
 
   const topScore = cands[0]?.score ?? 0;
   const margin = topScore - (cands[1]?.score ?? 0);
@@ -56,7 +52,7 @@ ${schema}
 - general: anything else / greetings / small talk.
 
 Rules: If a specific workflow clearly fits, pick it; otherwise pick "general". Keep the active workflow when the message answers its pending question. Extract slot values the customer stated. Detect language as en, hi, or gu (Roman-script Hindi/Gujarati count as hi/gu).
-Reply as JSON: {"workflow": "<slug>", "confidence": 0..1, "reason": "<short>", "slots": {<key>:<value>}, "language": "en|hi|gu", "needs_clarification": <bool>${voice ? ', "knowledge_query": "<3-8 English search keywords translating the question, no invented facts>"' : ''}}${voice ? `\nCurrent speech language: ${input.language || 'en'}. Preserve it for short numbers or ambiguous answers; change when the customer clearly switches language. Hindi with everyday English words is hi.` : ''}`;
+Reply as JSON: {"workflow": "<slug>", "confidence": 0..1, "reason": "<short>", "slots": {<key>:<value>}, "language": "en|hi|gu", "needs_clarification": <bool>}`;
   const ctx = input.activeWorkflow ? `Active workflow: ${input.activeWorkflow.slug}. Pending question slot: ${input.pendingSlot ?? 'none'}. Known: ${JSON.stringify(input.knownSlots)}` : 'No active workflow.';
   const recent = input.recentTurns.slice(-4).map((t) => `${t.role}: ${t.content}`).join('\n');
 
@@ -74,11 +70,10 @@ Reply as JSON: {"workflow": "<slug>", "confidence": 0..1, "reason": "<short>", "
       slots: typeof parsed.slots === 'object' && parsed.slots ? Object.fromEntries(Object.entries(parsed.slots).map(([k, v]) => [k, String(v)])) : {},
       language: ['en', 'hi', 'gu'].includes(parsed.language) ? parsed.language : detectScript(input.message),
       needsClarification: Boolean(parsed.needs_clarification),
-      ...(voice && typeof parsed.knowledge_query === 'string' ? { knowledgeQuery: parsed.knowledge_query.slice(0, 240) } : {}),
     };
   } catch {
     const chosen = candWorkflows[0] ?? fallback;
-    return { workflowId: chosen.id, slug: chosen.slug, confidence: topScore, reason: 'fallback route', slots: {}, language: voice && !/[A-Za-zऀ-ॿ઀-૿]/.test(input.message) ? input.language || 'en' : detectScript(input.message), needsClarification: false };
+    return { workflowId: chosen.id, slug: chosen.slug, confidence: topScore, reason: 'fallback route', slots: {}, language: detectScript(input.message), needsClarification: false };
   }
 }
 

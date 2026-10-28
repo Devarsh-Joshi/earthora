@@ -1,4 +1,4 @@
-/** Indian tax-invoice PDF — ported from voice-service/src/payments/invoice-pdf.ts, data now read from the owned DB. */
+/** Indian tax-invoice PDF, data read from the owned DB. Older orders may still carry WhatsApp/voice sources. */
 import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

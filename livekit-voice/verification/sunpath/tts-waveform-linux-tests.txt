@@ -1,4 +1,0 @@
-........................................................................ [ 98%]
-.                                                                        [100%]
-73 passed in 2.41s
-Isolated source directory: /tmp/earthora-tts-cpu-regression.e99ZkD

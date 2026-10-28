@@ -1,7 +1,0 @@
-# Keep deployable source portable and preserve the exact archived UniExl bytes.
-* text=auto eol=lf
-upstream/** -text
-# Preserve source-reference hashes across Windows/Linux checkouts.
-reference/sunpath/** -text whitespace=cr-at-eol
-# Blank context lines in a unified patch contain one required space.
-verification/sunpath/*.patch -whitespace

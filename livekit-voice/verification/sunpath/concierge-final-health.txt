@@ -1,8 +1,0 @@
-api: healthy
-control: healthy
-agent: healthy
-{"release": "/opt/earthora/releases/sunpath-voice-0513efa1471b", "tag": "earthora-livekit-agent:sunpath-0513efa1471b", "image": "sha256:3b056f53c4d53790db6e34aae2f19e7322f1f2b0487189316de7feee76f428e8", "rollback": "/opt/earthora/backups/pre-concierge-voice-20260921T043859Z"}
-{"name": "earthora-api", "state": "running", "restart_count": 0}
-{"name": "earthora-livekit-agent", "state": "running", "restart_count": 0}
-{"name": "earthora-voice-control", "state": "running", "restart_count": 0}
-{"remaining_rooms": 0}

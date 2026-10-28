@@ -1,1 +1,0 @@
-{"name":"earthora-livekit-browser","private":true,"type":"module","scripts":{"build":"esbuild transport.ts --bundle --format=iife --target=es2020 --minify --outfile=../../apps/api/public/voice-client.js"},"dependencies":{"livekit-client":"2.13.3"},"devDependencies":{"esbuild":"0.25.10","typescript":"5.9.3"}}

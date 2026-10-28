@@ -37,7 +37,7 @@ afterEach(() => {
 describe('public route hash scrolling', () => {
   it('waits for the home product section after a link from the lazy health page', async () => {
     const oldPage = document.createElement('div');
-    oldPage.dataset.earthoraVoicePage = '/health-benefits';
+    oldPage.dataset.earthoraPage = '/health-benefits';
     document.body.appendChild(oldPage);
 
     window.history.pushState(null, '', '/#products');
@@ -47,7 +47,7 @@ describe('public route hash scrolling', () => {
     expect(HTMLElement.prototype.scrollIntoView).not.toHaveBeenCalled();
 
     const home = document.createElement('div');
-    home.dataset.earthoraVoicePage = '/';
+    home.dataset.earthoraPage = '/';
     const products = document.createElement('section');
     products.id = 'products';
     home.appendChild(products);
@@ -65,7 +65,7 @@ describe('public route hash scrolling', () => {
     act(() => root.render(<ScrollToTop />));
 
     const home = document.createElement('div');
-    home.dataset.earthoraVoicePage = '/';
+    home.dataset.earthoraPage = '/';
     home.innerHTML = '<section id="products"></section>';
     document.body.appendChild(home);
 

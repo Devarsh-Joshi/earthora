@@ -14,21 +14,6 @@ services:
       - "127.0.0.1:4100:4100"
     volumes:
       - /opt/earthora/data/assets:/app/data/assets
-  # Smartflo telephony bridge + browser voice streaming. Built from its own
-  # checkout (/opt/earthora/voice-src) rather than src-repo, so the API's
-  # deploy procedure — which hard-resets src-repo to origin/main — cannot move
-  # this service's code underneath it. It does not use the local Postgres;
-  # its data still lives in the legacy Supabase project.
-  voice:
-    build:
-      context: /opt/earthora/voice-src
-      dockerfile: voice-service/Dockerfile
-    image: earthora-voice:latest
-    container_name: earthora-voice
-    restart: unless-stopped
-    env_file: /opt/earthora/infra/voice.env
-    ports:
-      - "127.0.0.1:4200:4200"
   worker:
     image: earthora-api:latest
     container_name: earthora-worker

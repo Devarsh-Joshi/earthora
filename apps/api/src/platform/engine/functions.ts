@@ -6,7 +6,7 @@ import { listProducts, priceCart } from '../../modules/commerce/pricing.js';
 import { retrieve } from '../kb/retrieve.js';
 import { tenantId } from '../kb/ingest.js';
 import type { ToolDef } from '../providers/types.js';
-import { checkoutCustomerSchema, createCheckoutSnapshot } from '../channels/voiceCheckout.js';
+import { checkoutCustomerSchema, createCheckoutSnapshot } from '../channels/checkoutLink.js';
 
 export interface FunctionContext {
   conversationId: string; channelType: string;
@@ -126,8 +126,7 @@ export const BUILTINS: BuiltinFunction[] = [
       if (priced.unavailable.length || priced.outOfStock.length) return { ok: false, message: 'Some cart items are no longer available in that quantity. Please update the cart.' };
       const token = createCheckoutSnapshot(ctx.conversationId, ctx.state.language, customer.data, ctx.state.cart.map(c => ({ productId: c.productId, quantity: c.quantity })));
       const url = `${config.PUBLIC_STORE_URL}/ai-checkout/${encodeURIComponent(token)}`;
-      return { ok: true, data: { url, total: priced.total, order_placed: false, payment_required: true,
-        ...(ctx.channelType === 'voice' ? { browser_action: { action: 'open_checkout', payload: { path: '/ai-checkout/' + encodeURIComponent(token) } } } : {}) }, sideEffect: 'checkout' };
+      return { ok: true, data: { url, total: priced.total, order_placed: false, payment_required: true }, sideEffect: 'checkout' };
     },
   },
   {

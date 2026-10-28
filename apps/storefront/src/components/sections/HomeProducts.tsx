@@ -12,6 +12,7 @@ import type { Product } from "@/types";
 export function HomeProducts() {
   const { data: products = [], isLoading } = useQuery<Product[]>({
     ...publicProductsQuery,
+    refetchOnMount: "always",
   });
 
   const [, setLocation] = useLocation();
