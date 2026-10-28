@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /sun-earthora/
+Disallow: /developer/
+Disallow: /kacc/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /review-order
+Disallow: /ai-checkout/
+Disallow: /favorites
+
+Sitemap: https://www.earthorafarms.com/sitemap.xml

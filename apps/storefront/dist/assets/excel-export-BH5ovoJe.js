@@ -1,0 +1,2 @@
+function v(l,t){if(!t||t.length===0)return;const s=Object.keys(t[0]),n=[];n.push(s.map(c=>`"${c.replace(/"/g,'""')}"`).join(","));for(const c of t){const i=s.map(d=>{const o=c[d];return o==null?'""':`"${String(o).replace(/"/g,'""')}"`});n.push(i.join(","))}const a="\uFEFF"+n.join(`
+`),u=new Blob([a],{type:"text/csv;charset=utf-8;"}),r=URL.createObjectURL(u),e=document.createElement("a");e.href=r,e.setAttribute("download",`${l.replace(/\.csv$/,"")}.csv`),document.body.appendChild(e),e.click(),document.body.removeChild(e),URL.revokeObjectURL(r)}export{v as e};
